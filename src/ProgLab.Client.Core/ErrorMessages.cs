@@ -50,6 +50,11 @@ public static class ErrorMessages
         [ErrorCodes.ExamHasDeletedQuestion] = "Sınavda bankadan silinmiş bir soru var. Soruyu listeden çıkarın.",
         [ErrorCodes.DuplicateQuestion] = "Bir soru sınava bir kez eklenebilir.",
         [ErrorCodes.DuplicateOrderNo] = "Soru sıraları benzersiz olmalıdır.",
+        [ErrorCodes.NotInClass] = "Bu sınav sizin şubenize açık değil.",
+        [ErrorCodes.ExamNotOpen] = "Sınav henüz başlamadı.",
+        [ErrorCodes.ExamClosed] = "Sınav süresi doldu.",
+        [ErrorCodes.AlreadySubmitted] = "Bu sınavı zaten teslim ettiniz.",
+        [ErrorCodes.NotOwner] = "Bu gönderim size ait değil.",
         [ApiException.ConnectionFailed] = "Sunucuya ulaşılamadı. Sunucunun açık olduğunu, adresi ve ağ bağlantınızı kontrol edin; güvenlik duvarı engelliyor olabilir."
     };
 

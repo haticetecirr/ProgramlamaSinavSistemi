@@ -63,13 +63,17 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private void LeaveCurrentPage()
     {
-        if (CurrentPage is LobbyViewModel lobby)
+        switch (CurrentPage)
         {
-            lobby.Stop();
-        }
-        else if (CurrentPage is ConnectViewModel connect)
-        {
-            connect.StopDiscovery();
+            case LobbyViewModel lobby:
+                lobby.Stop();
+                break;
+            case ExamPaperViewModel paper:
+                paper.Stop();
+                break;
+            case ConnectViewModel connect:
+                connect.StopDiscovery();
+                break;
         }
     }
 
@@ -92,6 +96,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void ShowLogin(string? message = null)
     {
         LeaveCurrentPage();
+        if (_hub is not null)
+        {
+            _ = _hub.StopAsync(); // Oturum kapandı: canlı bağlantı da kapanır.
+        }
+
         UserName = null;
         CurrentPage = new LoginViewModel(_api!, OnLoggedIn, ShowFirstLogin, message, _factory is null ? null : ShowConnect, _serverText);
     }
@@ -101,8 +110,23 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void OnLoggedIn(LoginResponse response)
     {
         UserName = response.FullName;
-        var lobby = new LobbyViewModel(_api!, _hub, response.FullName, _ui);
+        ShowLobby();
+    }
+
+    private void ShowLobby()
+    {
+        LeaveCurrentPage();
+        var lobby = new LobbyViewModel(_api!, _hub, UserName!, _ui, OpenPaper);
         CurrentPage = lobby;
         lobby.Start();
+    }
+
+    private void OpenPaper(int examId)
+    {
+        LeaveCurrentPage();
+        var paper = new ExamPaperViewModel(_api!, _hub, examId, _ui, ShowLobby);
+        CurrentPage = paper;
+        paper.Start();
+        _ = paper.LoadCommand.ExecuteAsync(null);
     }
 }

@@ -23,6 +23,8 @@
           <DataTemplate x:DataType="vm:LobbyExamRow">
             <Border Margin="0,0,0,8" Padding="12" BorderBrush="#40808080" BorderThickness="1" CornerRadius="6">
               <DockPanel>
+                <Button DockPanel.Dock="Right" Classes="accent" Content="{Binding JoinText}" IsVisible="{Binding CanJoin}" VerticalAlignment="Center" Margin="12,0,0,0"
+                        Command="{Binding JoinCommand}" AutomationProperties.Name="{Binding JoinName}" />
                 <TextBlock DockPanel.Dock="Right" Text="{Binding StateText}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,0,0" />
                 <StackPanel Spacing="2">
                   <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />

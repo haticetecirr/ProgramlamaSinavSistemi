@@ -36,6 +36,14 @@ public sealed class ConnectionTracker
         }
     }
 
+    public IReadOnlyList<string> GetConnectionIds(int studentId)
+    {
+        lock (_lock)
+        {
+            return _connections.Where(c => c.Value.StudentId == studentId).Select(c => c.Key).ToList();
+        }
+    }
+
     public IReadOnlyList<StudentConnectionDto> GetStudents()
     {
         lock (_lock)

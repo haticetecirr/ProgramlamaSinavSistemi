@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.StudentApp.ViewModels"
+             x:Class="ProgLab.StudentApp.Views.MultipleChoiceQuestionView"
+             x:DataType="vm:MultipleChoiceQuestionViewModel">
+  <StackPanel Spacing="10" Margin="0,0,12,0">
+    <TextBlock Classes="section" Text="{Binding Heading}" />
+    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="16" />
+    <ItemsControl ItemsSource="{Binding Options}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="vm:PaperOptionViewModel">
+          <RadioButton IsChecked="{Binding IsSelected}" Margin="0,4" AutomationProperties.Name="{Binding Text}">
+            <TextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+          </RadioButton>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    <Button Content="Seçimi temizle" Command="{Binding ClearSelectionCommand}" AutomationProperties.Name="Seçimi temizle" />
+  </StackPanel>
+</UserControl>

@@ -8,11 +8,28 @@ using ProgLab.Shared.Enums;
 namespace ProgLab.StudentApp.ViewModels;
 
 /// <summary>Lobideki sınav kartı. Saatler bilgisayarın yerel saatiyle gösterilir, süre sunucudan gelir.</summary>
-public sealed record LobbyExamRow(StudentExamSummaryDto Exam)
+public sealed class LobbyExamRow
 {
+    public LobbyExamRow(StudentExamSummaryDto exam, Func<LobbyExamRow, Task>? join = null)
+    {
+        Exam = exam;
+        JoinCommand = new AsyncRelayCommand(() => join?.Invoke(this) ?? Task.CompletedTask);
+    }
+
+    public StudentExamSummaryDto Exam { get; }
+
+    public IAsyncRelayCommand JoinCommand { get; }
+
     public string Title => Exam.Title;
 
     public string KindText => Exam.Kind == ExamKind.Exam ? "Sınav" : "Ödev";
+
+    public bool CanJoin => Exam.State == StudentExamState.Open;
+
+    public string JoinText => Exam.HasStarted ? "Devam et" : "Katıl";
+
+    /// <summary>Ekran okuyucu ve deneme betikleri için hangi sınava ait olduğunu söyler.</summary>
+    public string JoinName => $"{JoinText}: {Title}";
 
     public string StateText => Exam.State switch
     {
@@ -34,7 +51,7 @@ public sealed record LobbyExamRow(StudentExamSummaryDto Exam)
 /// Öğrencinin sınav listesi. Her değişiklikte liste sunucudan yeniden çekilir: bildirim yalnızca "tazele" sinyalidir.
 /// Ödevin başlangıç anı gibi bildirim gelmeyen durum değişiklikleri için liste belirli aralıkla da yenilenir.
 /// </summary>
-public sealed partial class LobbyViewModel(ApiClient api, ExamHubClient? hub, string fullName, Action<Action> ui) : ObservableObject
+public sealed partial class LobbyViewModel(ApiClient api, ExamHubClient? hub, string fullName, Action<Action> ui, Action<int>? openPaper = null) : ObservableObject
 {
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(20);
 
@@ -72,11 +89,16 @@ public sealed partial class LobbyViewModel(ApiClient api, ExamHubClient? hub, st
             hub.ExamEnded += OnExamChanged;
             hub.StateChanged += OnHubStateChanged;
             hub.StartInBackground();
+            if (hub.IsConnected)
+            {
+                ConnectionText = "Sunucuya bağlı"; // Sınav ekranından dönüldü: bağlantı zaten açık.
+            }
         }
 
         _ = RefreshLoopAsync(cts.Token);
     }
 
+    /// <summary>Ekrandan çıkınca dinlemeyi bırakır. Bağlantının kendisini ana pencere yönetir.</summary>
     public void Stop()
     {
         _running?.Cancel();
@@ -87,7 +109,6 @@ public sealed partial class LobbyViewModel(ApiClient api, ExamHubClient? hub, st
             hub.ExamPublished -= OnExamChanged;
             hub.ExamEnded -= OnExamChanged;
             hub.StateChanged -= OnHubStateChanged;
-            _ = hub.StopAsync();
         }
     }
 
@@ -106,7 +127,7 @@ public sealed partial class LobbyViewModel(ApiClient api, ExamHubClient? hub, st
             Exams.Clear();
             foreach (var exam in exams)
             {
-                Exams.Add(new LobbyExamRow(exam));
+                Exams.Add(new LobbyExamRow(exam, JoinAsync));
             }
 
             ErrorMessage = null;
@@ -115,6 +136,22 @@ public sealed partial class LobbyViewModel(ApiClient api, ExamHubClient? hub, st
         }
         catch (ApiException ex)
         {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private async Task JoinAsync(LobbyExamRow row)
+    {
+        ErrorMessage = null;
+        try
+        {
+            await api.JoinExamAsync(row.Exam.Id);
+            openPaper?.Invoke(row.Exam.Id);
+        }
+        catch (ApiException ex)
+        {
+            // Ör. sınav bu arada bitti: mesajı göster ve listeyi tazele.
+            await RefreshAsync();
             ErrorMessage = ex.Message;
         }
     }

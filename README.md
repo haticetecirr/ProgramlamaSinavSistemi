@@ -2,7 +2,7 @@
 
 Yerel ağda çalışan masaüstü sınav platformu. C#, .NET 10, Avalonia UI, ASP.NET Core ve PostgreSQL ile geliştirilir.
 
-Şu anki durum: **Vize — Aşama 6 (sunucu–istemci bağlantısı)**.
+Şu anki durum: **Vize — Aşama 7 (öğrenci sınav ekranı)**. Cevapların sunucuya kaydı ve teslim Aşama 8'de eklenir.
 
 ## Projeler
 

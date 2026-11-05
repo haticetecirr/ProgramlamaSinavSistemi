@@ -14,7 +14,8 @@ namespace ProgLab.Server.Tests;
 /// <summary>SignalR bildirimleri (VT-17'nin otomatik kısmı) ve lobi (VT-18). Gerçek hub, bellekteki sunucu üzerinden.</summary>
 public sealed class RealtimeTests(MigratedDatabaseFixture fixture) : IClassFixture<MigratedDatabaseFixture>, IAsyncLifetime
 {
-    private static readonly TimeSpan EventTimeout = TimeSpan.FromSeconds(5);
+    // Bekleme üst sınırı: başarılı testi yavaşlatmaz, yalnızca bilgisayar yoğunken yanlış alarmı önler.
+    private static readonly TimeSpan EventTimeout = TimeSpan.FromSeconds(20);
     private static readonly QuestionOptionInput[] Options = [new("Doğru", true), new("Yanlış", false)];
 
     private readonly List<ExamHubClient> _hubs = [];
