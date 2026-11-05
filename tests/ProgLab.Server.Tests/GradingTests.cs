@@ -421,3 +421,32 @@ public sealed class GradingApiTests(MigratedDatabaseFixture fixture) : IClassFix
         Assert.DoesNotContain("score", body, StringComparison.OrdinalIgnoreCase);
     }
 }
+
+/// <summary>Yük testinde bulunan hatanın kalıcı denetimi: 100 eş zamanlı istek bağlantı sınırını aşmamalı.</summary>
+public sealed class ConnectionPoolTests
+{
+    private const string Connection = "Host=localhost;Database=x;Username=y;Password=z";
+
+    [Fact]
+    public void DefaultPool_IsLimited_BelowPostgresConnectionLimit()
+    {
+        var result = new Npgsql.NpgsqlConnectionStringBuilder(ProgLab.Server.Data.AppDbContext.LimitPoolSize(Connection));
+
+        Assert.Equal(40, result.MaxPoolSize);
+        Assert.Equal("Password=z".Split('=')[1], result.Password);
+    }
+
+    [Fact]
+    public void SmallerConfiguredPool_IsKept()
+    {
+        var result = new Npgsql.NpgsqlConnectionStringBuilder(ProgLab.Server.Data.AppDbContext.LimitPoolSize(Connection + ";Maximum Pool Size=10"));
+
+        Assert.Equal(10, result.MaxPoolSize);
+    }
+
+    [Fact]
+    public void MissingConnectionString_IsLeftAlone()
+    {
+        Assert.Null(ProgLab.Server.Data.AppDbContext.LimitPoolSize(null));
+    }
+}
