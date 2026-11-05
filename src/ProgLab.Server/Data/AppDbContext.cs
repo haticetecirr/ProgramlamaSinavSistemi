@@ -21,8 +21,26 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<ActivityLog> ActivityLogs => Set<ActivityLog>();
 
     /// <summary>Sunucu, testler ve migration aracı aynı ayarları kullansın diye tek yerde.</summary>
+    private const int MaxConnections = 40;
+
     public static void Configure(DbContextOptionsBuilder options, string? connectionString) =>
-        options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention();
+        options.UseNpgsql(LimitPoolSize(connectionString)).UseSnakeCaseNamingConvention();
+
+    /// <summary>
+    /// Npgsql'in varsayılan üst sınırı (100), PostgreSQL'in varsayılan bağlantı sınırıyla aynıdır: 100 öğrenci aynı anda
+    /// katılınca sunucu bağlantı hatası verir (yük testinde görüldü). Sınırlanınca fazla istek hata almaz, sırada bekler.
+    /// </summary>
+    public static string? LimitPoolSize(string? connectionString)
+    {
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            return connectionString;
+        }
+
+        var builder = new Npgsql.NpgsqlConnectionStringBuilder(connectionString);
+        builder.MaxPoolSize = Math.Min(builder.MaxPoolSize, MaxConnections);
+        return builder.ConnectionString;
+    }
 
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

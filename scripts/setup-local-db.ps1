@@ -1,11 +1,18 @@
-# Creates the limited PostgreSQL role and databases, and writes the secrets to
-# src/ProgLab.Server/appsettings.Local.json (ignored by Git). No password is printed.
-# psql asks for the postgres admin password itself; this script never sees it.
+# Creates the limited PostgreSQL role and databases, and writes the secrets to appsettings.Local.json
+# (ignored by Git): next to the server when run from a published copy, otherwise in src/ProgLab.Server.
+# No password is printed. psql asks for the postgres admin password itself; this script never sees it.
+# Running it without the settings file creates a new app password: if the role already exists on this
+# computer, copy the existing appsettings.Local.json instead.
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
-$localSettings = Join-Path $root "src\ProgLab.Server\appsettings.Local.json"
-$psql = "C:\Program Files\PostgreSQL\18\bin\psql.exe"
+$sourceServer = Join-Path $root "src\ProgLab.Server"
+$localSettings = if (Test-Path $sourceServer) { Join-Path $sourceServer "appsettings.Local.json" } else { Join-Path $root "appsettings.Local.json" }
+
+# The newest installed PostgreSQL version is used.
+$psql = Get-ChildItem "C:\Program Files\PostgreSQL\*\bin\psql.exe" -ErrorAction SilentlyContinue |
+    Sort-Object { [int]$_.Directory.Parent.Name } -Descending |
+    Select-Object -First 1 -ExpandProperty FullName
 
 function New-RandomSecret([int]$length) {
     $alphabet = "abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"
@@ -14,8 +21,8 @@ function New-RandomSecret([int]$length) {
     -join ($bytes | ForEach-Object { $alphabet[$_ % $alphabet.Length] })
 }
 
-if (-not (Test-Path $psql)) {
-    throw "psql was not found: $psql"
+if (-not $psql) {
+    throw "psql was not found under C:\Program Files\PostgreSQL. Install PostgreSQL 16 or newer."
 }
 
 # Re-running keeps the existing passwords.
@@ -52,4 +59,4 @@ $settings = [ordered]@{
 }
 $settings | ConvertTo-Json -Depth 3 | Out-File -FilePath $localSettings -Encoding utf8
 
-Write-Host "DONE: role and databases are ready. Secrets are in src\ProgLab.Server\appsettings.Local.json"
+Write-Host "DONE: role and databases are ready. Secrets are in $localSettings"

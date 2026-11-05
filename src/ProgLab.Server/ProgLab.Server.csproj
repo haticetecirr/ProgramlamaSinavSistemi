@@ -24,4 +24,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- Parolalar yayın çıktısına girmez: her kurulumun kendi dosyası olur. -->
+  <ItemGroup>
+    <Content Update="appsettings.Local*.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
 </Project>
