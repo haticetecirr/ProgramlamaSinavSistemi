@@ -56,6 +56,7 @@ public static class ErrorMessages
         [ErrorCodes.AlreadySubmitted] = "Bu sınavı zaten teslim ettiniz.",
         [ErrorCodes.NotOwner] = "Bu gönderim size ait değil.",
         [ErrorCodes.SubmissionNotFound] = "Gönderim bulunamadı.",
+        [ErrorCodes.AnswerNotFound] = "Cevap bulunamadı.",
         [ErrorCodes.OptionNotInQuestion] = "Seçilen şık bu soruya ait değil.",
         [ErrorCodes.AnswerTooLong] = "Cevap en fazla 2000 karakter olabilir.",
         [ApiException.ConnectionFailed] = "Sunucuya ulaşılamadı. Sunucunun açık olduğunu, adresi ve ağ bağlantınızı kontrol edin; güvenlik duvarı engelliyor olabilir."

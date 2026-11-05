@@ -5,6 +5,7 @@ using NpgsqlTypes;
 using ProgLab.Server.Data;
 using ProgLab.Server.Data.Entities;
 using ProgLab.Server.Errors;
+using ProgLab.Server.Grading;
 using ProgLab.Server.Logging;
 using ProgLab.Shared;
 using ProgLab.Shared.Dtos;
@@ -13,9 +14,13 @@ using ProgLab.Shared.Enums;
 namespace ProgLab.Server.Services;
 
 /// <summary>Öğrencinin sınava katılması, sınav kâğıdı, cevap kaydı ve teslim.</summary>
-public sealed class SubmissionService(AppDbContext db, ExamNotifier notifier, ActivityRecorder recorder)
+public sealed class SubmissionService(AppDbContext db, ExamNotifier notifier, ActivityRecorder recorder, GradingService grading)
 {
     public const int MaxAnswerLength = 2000;
+
+    // Öğrenci cevabını değiştirirse eski puan (eğitmenin elle verdiği dahil) o cevaba ait değildir, silinir.
+    private const string AnswerChanged =
+        "answers.selected_option_id IS DISTINCT FROM EXCLUDED.selected_option_id OR answers.text_answer IS DISTINCT FROM EXCLUDED.text_answer";
 
     /// <summary>
     /// Gönderim yoksa oluşturur, varsa aynısını döner. Süre öğrenciye değil sınava bağlı olduğu için
@@ -167,11 +172,17 @@ public sealed class SubmissionService(AppDbContext db, ExamNotifier notifier, Ac
         }
 
         await db.Database.ExecuteSqlRawAsync(
-            """
+            $"""
             INSERT INTO answers (submission_id, exam_question_id, selected_option_id, text_answer, updated_at)
             VALUES (@sid, @eq, @option, @text, @now)
             ON CONFLICT (submission_id, exam_question_id)
-            DO UPDATE SET selected_option_id = EXCLUDED.selected_option_id, text_answer = EXCLUDED.text_answer, updated_at = EXCLUDED.updated_at
+            DO UPDATE SET
+                selected_option_id = EXCLUDED.selected_option_id,
+                text_answer = EXCLUDED.text_answer,
+                updated_at = EXCLUDED.updated_at,
+                score = CASE WHEN {AnswerChanged} THEN NULL ELSE answers.score END,
+                graded_by = CASE WHEN {AnswerChanged} THEN NULL ELSE answers.graded_by END,
+                graded_note = CASE WHEN {AnswerChanged} THEN NULL ELSE answers.graded_note END
             """,
             [
                 new NpgsqlParameter("sid", submission.Id),
@@ -188,6 +199,8 @@ public sealed class SubmissionService(AppDbContext db, ExamNotifier notifier, Ac
         if (submission.Status == SubmissionStatus.Submitted)
         {
             submission.Status = SubmissionStatus.InProgress;
+            submission.TotalScore = null;
+            submission.GradedAt = null;
         }
 
         await db.SaveChangesAsync(ct);
@@ -226,7 +239,8 @@ public sealed class SubmissionService(AppDbContext db, ExamNotifier notifier, Ac
         submission.SubmitCount++;
         submission.ClientIp = ip ?? submission.ClientIp;
 
-        // Puanlama Aşama 9'da burada aynı işlem içinde yapılacak.
+        var totalScore = await grading.GradeSubmissionAsync(submission, ct);
+
         recorder.Add(
             ActivityEvents.Submitted,
             exam.Id,
@@ -234,8 +248,8 @@ public sealed class SubmissionService(AppDbContext db, ExamNotifier notifier, Ac
             submission,
             null,
             ip,
-            new { answeredCount = answered, totalQuestions = total, submitNo = submission.SubmitCount, answersSummary = answers },
-            $"{answered}/{total} cevap, {submission.SubmitCount}. teslim");
+            new { answeredCount = answered, totalQuestions = total, totalScore, submitNo = submission.SubmitCount, answersSummary = answers },
+            $"{answered}/{total} cevap, {ExamLogWriter.FormatScore(totalScore)} puan, {submission.SubmitCount}. teslim");
 
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);

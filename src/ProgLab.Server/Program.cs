@@ -1,3 +1,4 @@
+using ProgLab.Server.Grading;
 using System.Net;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -56,6 +57,9 @@ builder.Services.AddScoped<ExamService>();
 builder.Services.AddScoped<ExamNotifier>();
 builder.Services.AddScoped<StudentExamService>();
 builder.Services.AddScoped<SubmissionService>();
+builder.Services.AddSingleton<IGrader, MultipleChoiceGrader>();
+builder.Services.AddSingleton<IGrader, ClassicGrader>();
+builder.Services.AddScoped<GradingService>();
 builder.Services.AddScoped<ExamCompletionService>();
 builder.Services.AddScoped<ActivityRecorder>();
 builder.Services.AddSingleton<ExamLogWriter>();

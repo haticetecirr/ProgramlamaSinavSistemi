@@ -20,6 +20,9 @@ public sealed class ExamLogWriter(IConfiguration configuration, IWebHostEnvironm
         ? configured
         : environment.IsEnvironment("Testing") ? null : Path.Combine(environment.ContentRootPath, "logs", "exams");
 
+    /// <summary>Log dosyasında puan her zaman iki ondalıklı ve noktalıdır: 72.50</summary>
+    public static string FormatScore(decimal score) => score.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+
     public static string FormatLine(DateTimeOffset at, string eventType, string username, string fullName, string? ip, string text) =>
         string.Create(
             CultureInfo.InvariantCulture,

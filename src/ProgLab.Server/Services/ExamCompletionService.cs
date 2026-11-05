@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.EntityFrameworkCore;
 using ProgLab.Server.Data;
 using ProgLab.Server.Data.Entities;
+using ProgLab.Server.Grading;
 using ProgLab.Server.Logging;
 using ProgLab.Shared.Enums;
 
@@ -11,7 +12,7 @@ namespace ProgLab.Server.Services;
 /// Sınavın tamamlanmasının tek yolu: süre dolumu ve eğitmenin "Bitir" komutu aynı akışı kullanır.
 /// Devam eden gönderimler kayıtlı cevaplarıyla otomatik teslim edilir.
 /// </summary>
-public sealed class ExamCompletionService(AppDbContext db, ExamNotifier notifier, ActivityRecorder recorder)
+public sealed class ExamCompletionService(AppDbContext db, ExamNotifier notifier, ActivityRecorder recorder, GradingService grading)
 {
     /// <summary>Sınav zaten tamamlanmışsa veya başkası tamamladıysa false döner.</summary>
     public async Task<bool> CompleteAsync(int examId, string reason, int? userId, IPAddress? ip, CancellationToken ct)
@@ -48,9 +49,9 @@ public sealed class ExamCompletionService(AppDbContext db, ExamNotifier notifier
         {
             var answered = answeredBySubmission.GetValueOrDefault(submission.Id);
 
-            // Puanlama Aşama 9'da burada aynı işlem içinde yapılacak.
             submission.Status = SubmissionStatus.AutoSubmitted;
             submission.SubmittedAt = now;
+            var totalScore = await grading.GradeSubmissionAsync(submission, ct);
             recorder.Add(
                 ActivityEvents.AutoSubmitted,
                 examId,
@@ -58,8 +59,8 @@ public sealed class ExamCompletionService(AppDbContext db, ExamNotifier notifier
                 submission,
                 null,
                 submission.ClientIp,
-                new { answeredCount = answered, totalQuestions = total },
-                $"{answered}/{total} cevap");
+                new { answeredCount = answered, totalQuestions = total, totalScore },
+                $"{answered}/{total} cevap, {ExamLogWriter.FormatScore(totalScore)} puan");
         }
 
         if (reason == ExamNotifier.ReasonManual)
