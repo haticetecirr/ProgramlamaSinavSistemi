@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using ProgLab.Shared;
 
@@ -15,6 +16,11 @@ public sealed class ApiExceptionMiddleware(RequestDelegate next, ILogger<ApiExce
         catch (ApiException ex)
         {
             await ApiProblem.WriteAsync(context, ex.StatusCode, ex.Code, ex.Message);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            // xmin kontrolü: aynı sınav bu sırada başka bir pencereden değişti.
+            await ApiProblem.WriteAsync(context, StatusCodes.Status409Conflict, ErrorCodes.InvalidState, "Bu kayıt başka bir pencerede değişti.");
         }
         catch (Exception ex) when (IsDatabaseUnavailable(ex))
         {

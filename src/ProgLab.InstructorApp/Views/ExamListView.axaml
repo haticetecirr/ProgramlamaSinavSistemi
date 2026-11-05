@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.InstructorApp.ViewModels"
+             x:Class="ProgLab.InstructorApp.Views.ExamListView"
+             x:DataType="vm:ExamListViewModel">
+  <DockPanel Margin="16">
+    <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,8">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Classes="accent" Content="Yeni sınav" Command="{Binding NewExamCommand}" AutomationProperties.Name="Yeni sınav" />
+        <TextBlock Classes="title" Text="Sınavlar ve Ödevler" />
+      </DockPanel>
+      <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" IsVisible="{Binding StatusMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <RadioButton GroupName="examTab" Content="Taslak" IsChecked="{Binding ShowDrafts}" AutomationProperties.Name="Taslak" />
+        <RadioButton GroupName="examTab" Content="Yayında" IsChecked="{Binding ShowPublished}" AutomationProperties.Name="Yayında" />
+        <RadioButton GroupName="examTab" Content="Tamamlandı" IsChecked="{Binding ShowCompleted}" AutomationProperties.Name="Tamamlandı" />
+      </StackPanel>
+    </StackPanel>
+
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,8,0,0">
+      <Border IsVisible="{Binding IsConfirmingDelete}" Padding="10" BorderBrush="#EF5350" BorderThickness="1" CornerRadius="4">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+            <Button Content="Evet, sil" Command="{Binding ConfirmDeleteCommand}" AutomationProperties.Name="Evet, sil" />
+            <Button Content="Vazgeç" Command="{Binding CancelConfirmationCommand}" AutomationProperties.Name="Silmekten vazgeç" />
+          </StackPanel>
+          <TextBlock Text="{Binding PendingDelete.Title, StringFormat='&quot;{0}&quot; taslağı silinsin mi?'}" VerticalAlignment="Center" TextWrapping="Wrap" />
+        </DockPanel>
+      </Border>
+      <Border IsVisible="{Binding IsConfirmingEnd}" Padding="10" BorderBrush="#EF5350" BorderThickness="1" CornerRadius="4">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+            <Button Content="Evet, bitir" Command="{Binding ConfirmEndCommand}" AutomationProperties.Name="Evet, bitir" />
+            <Button Content="Vazgeç" Command="{Binding CancelConfirmationCommand}" AutomationProperties.Name="Bitirmekten vazgeç" />
+          </StackPanel>
+          <TextBlock Text="{Binding PendingEnd.Title, StringFormat='&quot;{0}&quot; şimdi bitirilsin mi? Yeni cevap kabul edilmeyecek.'}" VerticalAlignment="Center" TextWrapping="Wrap" />
+        </DockPanel>
+      </Border>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Aç" Command="{Binding OpenExamCommand}" AutomationProperties.Name="Sınavı aç" />
+        <Button Content="Sil" IsVisible="{Binding ShowDrafts}" Command="{Binding AskDeleteCommand}" AutomationProperties.Name="Sınavı sil" />
+        <Button Content="Bitir" IsVisible="{Binding ShowPublished}" Command="{Binding AskEndCommand}" AutomationProperties.Name="Sınavı bitir" />
+        <Button Content="Kopyala" IsVisible="{Binding ShowCompleted}" Command="{Binding CopyCommand}" AutomationProperties.Name="Sınavı kopyala" />
+      </StackPanel>
+    </StackPanel>
+
+    <ListBox ItemsSource="{Binding Exams}" SelectedItem="{Binding SelectedExam}" AutomationProperties.Name="Sınav listesi">
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:ExamRow">
+          <StackPanel>
+            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Details}" Opacity="0.7" TextWrapping="Wrap" />
+          </StackPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+  </DockPanel>
+</UserControl>

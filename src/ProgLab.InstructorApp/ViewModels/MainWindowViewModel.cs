@@ -66,6 +66,23 @@ public sealed partial class MainWindowViewModel : ObservableObject
         _ = page.LoadCommand.ExecuteAsync(null);
     }
 
+    [RelayCommand]
+    private void ShowExams() => OpenExamList(null);
+
+    private void OpenExamList(string? message)
+    {
+        var page = new ExamListViewModel(_api, OpenExamEditor, message);
+        CurrentPage = page;
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void OpenExamEditor(int? examId)
+    {
+        var page = new ExamEditorViewModel(_api, examId, OpenExamList);
+        CurrentPage = page;
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
     private void ShowLogin(string? message = null)
     {
         UserName = null;
