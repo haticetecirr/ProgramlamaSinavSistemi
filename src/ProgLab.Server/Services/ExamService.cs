@@ -1,9 +1,9 @@
 using System.Net;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using ProgLab.Server.Data;
 using ProgLab.Server.Data.Entities;
 using ProgLab.Server.Errors;
+using ProgLab.Server.Hubs;
 using ProgLab.Server.Logging;
 using ProgLab.Shared;
 using ProgLab.Shared.Dtos;
@@ -12,7 +12,12 @@ using ProgLab.Shared.Enums;
 namespace ProgLab.Server.Services;
 
 /// <summary>Sınav ve ödev yaşam döngüsü: taslak, soru listesi, yayınlama, bitirme, kopyalama.</summary>
-public sealed class ExamService(AppDbContext db, ExamNotifier notifier)
+public sealed class ExamService(
+    AppDbContext db,
+    ExamNotifier notifier,
+    ActivityRecorder recorder,
+    ExamCompletionService completion,
+    ConnectionTracker tracker)
 {
     private const int MaxPageSize = 200;
 
@@ -192,44 +197,98 @@ public sealed class ExamService(AppDbContext db, ExamNotifier notifier)
         exam.PublishedAt = now;
         exam.UpdatedAt = now;
 
-        Log(ActivityEvents.ExamPublished, exam.Id, userId, ip, new { questionCount = exam.Questions.Count, startsAt, endsAt });
+        recorder.Add(
+            ActivityEvents.ExamPublished,
+            exam.Id,
+            userId,
+            null,
+            null,
+            ip,
+            new { questionCount = exam.Questions.Count, startsAt, endsAt },
+            $"{exam.Questions.Count} soru, bitiş {endsAt.ToLocalTime():dd.MM.yyyy HH:mm:ss}");
 
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
 
-        // Bildirim yalnızca işlem kalıcı olduktan sonra gider.
+        // Dosya satırı ve bildirim yalnızca işlem kalıcı olduktan sonra.
+        await recorder.WriteFilesAsync(ct);
         await notifier.ExamPublishedAsync(exam);
 
         return await GetFreshAsync(id, ct);
     }
 
-    /// <summary>
-    /// Eğitmenin erken bitirmesi. Açık gönderimlerin otomatik teslimi Aşama 8'de bu akışa eklenir.
-    /// </summary>
+    /// <summary>Eğitmenin erken bitirmesi: süre dolumuyla aynı tamamlama akışı, açık gönderimler otomatik teslim edilir.</summary>
     public async Task<InstructorExamDto> EndAsync(int id, int userId, IPAddress? ip, CancellationToken ct)
     {
-        var exam = await db.Exams.SingleOrDefaultAsync(e => e.Id == id, ct) ?? throw NotFound();
+        if (!await db.Exams.AnyAsync(e => e.Id == id, ct))
+        {
+            throw NotFound();
+        }
 
-        if (exam.Status != ExamStatus.Published)
+        if (!await completion.CompleteAsync(id, ExamNotifier.ReasonManual, userId, ip, ct))
         {
             throw new ApiException(StatusCodes.Status409Conflict, ErrorCodes.InvalidState, "Yalnızca yayındaki sınav bitirilebilir.");
         }
 
-        var now = DateTimeOffset.UtcNow;
-        var (startsAt, endsAt) = ExamRules.EarlyEndWindow(exam.StartsAt!.Value, now);
-
-        exam.Status = ExamStatus.Completed;
-        exam.StartsAt = startsAt;
-        exam.EndsAt = endsAt;
-        exam.CompletedAt = now;
-        exam.UpdatedAt = now;
-
-        Log(ActivityEvents.ExamEnded, exam.Id, userId, ip, new { reason = ExamNotifier.ReasonManual });
-
-        await db.SaveChangesAsync(ct);
-        await notifier.ExamEndedAsync(exam, ExamNotifier.ReasonManual);
-
         return await GetFreshAsync(id, ct);
+    }
+
+    /// <summary>Canlı izleme: şubedeki her öğrencinin bağlantısı, ilerlemesi ve teslim durumu.</summary>
+    public async Task<LiveExamDto> GetLiveAsync(int id, CancellationToken ct)
+    {
+        var exam = await db.Exams.AsNoTracking().SingleOrDefaultAsync(e => e.Id == id && e.Status != ExamStatus.Draft, ct) ?? throw NotFound();
+        var now = DateTimeOffset.UtcNow;
+
+        var submissions = await db.Submissions.AsNoTracking()
+            .Where(s => s.ExamId == id)
+            .Select(s => new
+            {
+                s.StudentId,
+                s.Status,
+                s.SubmittedAt,
+                s.ClientIp,
+                Answered = s.Answers.Count(a => a.SelectedOptionId != null || (a.TextAnswer != null && a.TextAnswer.Trim() != ""))
+            })
+            .ToDictionaryAsync(s => s.StudentId, ct);
+
+        var studentIds = submissions.Keys.ToList();
+        var students = await db.Users.AsNoTracking()
+            .Where(u => studentIds.Contains(u.Id) || db.ClassMembers.Any(m => m.ClassId == exam.ClassId && m.StudentId == u.Id))
+            .OrderBy(u => u.Username)
+            .Select(u => new { u.Id, u.Username, u.FullName })
+            .ToListAsync(ct);
+
+        var connected = tracker.GetStudents().ToDictionary(c => c.StudentId);
+        var rows = students.Select(u =>
+        {
+            var submission = submissions.GetValueOrDefault(u.Id);
+            var connection = connected.GetValueOrDefault(u.Id);
+            return new LiveStudentDto(
+                u.Id,
+                u.Username,
+                u.FullName,
+                connection is not null,
+                connection?.Ip ?? submission?.ClientIp?.ToString(),
+                submission?.Answered ?? 0,
+                submission?.Status,
+                submission?.SubmittedAt);
+        }).ToList();
+
+        var warnings = await db.ActivityLogs.AsNoTracking()
+            .Where(l => l.ExamId == id && l.EventType == ActivityEvents.SecondDevice)
+            .OrderBy(l => l.Id)
+            .Select(l => new { l.User!.FullName, l.Ip })
+            .ToListAsync(ct);
+
+        return new LiveExamDto(
+            exam.Id,
+            exam.Title,
+            exam.Status,
+            exam.Status == ExamStatus.Published ? ExamRules.RemainingSeconds(exam.EndsAt!.Value, now) : 0,
+            exam.EndsAt!.Value,
+            await db.ExamQuestions.CountAsync(q => q.ExamId == id, ct),
+            rows,
+            warnings.Select(w => $"{w.FullName} başka bir bilgisayardan da katıldı ({w.Ip}).").ToList());
     }
 
     /// <summary>Tamamlanmış sınavdan yeni taslak: aynı (kilitli) soru sürümleri ve puanlarla.</summary>
@@ -286,16 +345,6 @@ public sealed class ExamService(AppDbContext db, ExamNotifier notifier)
             exam.EndsAt = request.EndsAt!.Value.ToUniversalTime();
         }
     }
-
-    private void Log(string eventType, int examId, int userId, IPAddress? ip, object details) =>
-        db.ActivityLogs.Add(new ActivityLog
-        {
-            EventType = eventType,
-            ExamId = examId,
-            UserId = userId,
-            Ip = ip,
-            Details = JsonSerializer.Serialize(details)
-        });
 
     private async Task<Exam> FindDraftAsync(int id, CancellationToken ct)
     {

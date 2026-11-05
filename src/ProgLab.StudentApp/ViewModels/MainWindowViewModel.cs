@@ -124,9 +124,15 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private void OpenPaper(int examId)
     {
         LeaveCurrentPage();
-        var paper = new ExamPaperViewModel(_api!, _hub, examId, _ui, ShowLobby);
+        var paper = new ExamPaperViewModel(_api!, _hub, examId, _ui, ShowLobby, onFinished: ShowSubmitted);
         CurrentPage = paper;
         paper.Start();
         _ = paper.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void ShowSubmitted(ExamFinishedInfo info)
+    {
+        LeaveCurrentPage();
+        CurrentPage = new SubmittedViewModel(info, ShowLobby);
     }
 }

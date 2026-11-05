@@ -183,6 +183,15 @@ public sealed class ApiClient(HttpClient http, TokenStore? tokens = null)
     public Task<StudentPaperDto> GetPaperAsync(int examId, CancellationToken ct = default) =>
         SendAsync<StudentPaperDto>(HttpMethod.Get, $"api/student/exams/{examId}/paper", null, ct);
 
+    public Task SaveAnswerAsync(long submissionId, int examQuestionId, SaveAnswerRequest answer, CancellationToken ct = default) =>
+        SendAsync(HttpMethod.Put, $"api/student/submissions/{submissionId}/answers/{examQuestionId}", answer, ct);
+
+    public Task<SubmitResponse> SubmitAsync(long submissionId, CancellationToken ct = default) =>
+        SendAsync<SubmitResponse>(HttpMethod.Post, $"api/student/submissions/{submissionId}/submit", null, ct);
+
+    public Task<LiveExamDto> GetLiveExamAsync(int examId, CancellationToken ct = default) =>
+        SendAsync<LiveExamDto>(HttpMethod.Get, $"api/exams/{examId}/live", null, ct);
+
     public Task<IReadOnlyList<StudentConnectionDto>> GetConnectedStudentsAsync(CancellationToken ct = default) =>
         SendAsync<IReadOnlyList<StudentConnectionDto>>(HttpMethod.Get, "api/connections/students", null, ct);
 

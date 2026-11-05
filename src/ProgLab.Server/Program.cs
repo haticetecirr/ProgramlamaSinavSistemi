@@ -11,6 +11,7 @@ using ProgLab.Server.Data;
 using ProgLab.Server.Data.Seed;
 using ProgLab.Server.Errors;
 using ProgLab.Server.Hubs;
+using ProgLab.Server.Logging;
 using ProgLab.Server.Security;
 using ProgLab.Server.Services;
 using ProgLab.Shared;
@@ -55,6 +56,9 @@ builder.Services.AddScoped<ExamService>();
 builder.Services.AddScoped<ExamNotifier>();
 builder.Services.AddScoped<StudentExamService>();
 builder.Services.AddScoped<SubmissionService>();
+builder.Services.AddScoped<ExamCompletionService>();
+builder.Services.AddScoped<ActivityRecorder>();
+builder.Services.AddSingleton<ExamLogWriter>();
 builder.Services.Configure<ExamTimerOptions>(builder.Configuration.GetSection(ExamTimerOptions.Section));
 builder.Services.AddHostedService<ExamTimerService>();
 

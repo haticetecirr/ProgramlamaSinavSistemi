@@ -13,6 +13,7 @@ namespace ProgLab.Server.Services;
 public sealed class ExamNotifier(IHubContext<ExamHub> hub, ConnectionTracker tracker, ILogger<ExamNotifier> logger)
 {
     public const string ReasonManual = "Manual";
+    public const string ReasonTimeUp = "TimeUp";
 
     /// <summary>Katılan öğrencinin o anki bağlantılarını sınav grubuna ekler; süre bildirimleri bu gruba gider.</summary>
     public Task AddStudentToExamAsync(int studentId, int examId) => SendSafelyAsync(async () =>
@@ -32,6 +33,18 @@ public sealed class ExamNotifier(IHubContext<ExamHub> hub, ConnectionTracker tra
         hub.Clients.Groups(ExamHub.ClassGroup(exam.ClassId), ExamHub.InstructorsGroup).SendAsync(
             HubEvents.ExamEnded,
             new ExamEndedEvent(exam.Id, reason)));
+
+    public Task AnswerProgressAsync(AnswerProgressEvent progress) =>
+        ToInstructorsAsync(HubEvents.AnswerProgress, progress);
+
+    public Task SubmissionReceivedAsync(SubmissionReceivedEvent submission) =>
+        ToInstructorsAsync(HubEvents.SubmissionReceived, submission);
+
+    public Task SecondDeviceAsync(SecondDeviceEvent warning) =>
+        ToInstructorsAsync(HubEvents.SecondDeviceWarning, warning);
+
+    private Task ToInstructorsAsync(string eventName, object payload) => SendSafelyAsync(() =>
+        hub.Clients.Group(ExamHub.InstructorsGroup).SendAsync(eventName, payload));
 
     private async Task SendSafelyAsync(Func<Task> send)
     {

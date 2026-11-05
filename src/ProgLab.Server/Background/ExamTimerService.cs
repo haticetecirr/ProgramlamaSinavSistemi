@@ -15,13 +15,17 @@ public sealed class ExamTimerOptions
 {
     public const string Section = "ExamTimer";
 
+    /// <summary>Süresi dolan sınavların aranma aralığı (saniye). 0 kapatır.</summary>
+    public int CheckSeconds { get; set; } = 1;
+
     /// <summary>Kalan süre bildiriminin aralığı (saniye). 0 kapatır.</summary>
     public int TimeSyncSeconds { get; set; } = 30;
 }
 
 /// <summary>
-/// Açık sınavlara kalan süreyi bildirir (TimeSync). İstemcideki sayaç bununla düzeltilir.
-/// Süresi dolan sınavın tamamlanması ve otomatik teslim Aşama 8'de bu servise eklenir.
+/// Süresi dolan sınavları tamamlar ve açık sınavlara kalan süreyi bildirir.
+/// Tüm durum veritabanındadır: sunucu yeniden başlarsa ilk kontrol süresi geçmiş sınavları tamamlar,
+/// diğerleri kaldığı yerden sürer.
 /// </summary>
 public sealed class ExamTimerService(
     IServiceScopeFactory scopes,
@@ -29,7 +33,33 @@ public sealed class ExamTimerService(
     IOptions<ExamTimerOptions> options,
     ILogger<ExamTimerService> logger) : BackgroundService
 {
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken) => Task.WhenAll(
+        CompletionLoopAsync(stoppingToken),
+        TimeSyncLoopAsync(stoppingToken));
+
+    private async Task CompletionLoopAsync(CancellationToken ct)
+    {
+        if (options.Value.CheckSeconds <= 0)
+        {
+            return;
+        }
+
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(options.Value.CheckSeconds));
+        try
+        {
+            do
+            {
+                await CompleteExpiredExamsAsync(ct);
+            }
+            while (await timer.WaitForNextTickAsync(ct));
+        }
+        catch (OperationCanceledException)
+        {
+            // Sunucu kapanıyor.
+        }
+    }
+
+    private async Task TimeSyncLoopAsync(CancellationToken ct)
     {
         if (options.Value.TimeSyncSeconds <= 0)
         {
@@ -39,14 +69,44 @@ public sealed class ExamTimerService(
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(options.Value.TimeSyncSeconds));
         try
         {
-            while (await timer.WaitForNextTickAsync(stoppingToken))
+            while (await timer.WaitForNextTickAsync(ct))
             {
-                await SendTimeSyncAsync(stoppingToken);
+                await SendTimeSyncAsync(ct);
             }
         }
         catch (OperationCanceledException)
         {
             // Sunucu kapanıyor.
+        }
+    }
+
+    private async Task CompleteExpiredExamsAsync(CancellationToken ct)
+    {
+        try
+        {
+            List<int> expired;
+            using (var scope = scopes.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var now = DateTimeOffset.UtcNow;
+                expired = await db.Exams.AsNoTracking()
+                    .Where(e => e.Status == ExamStatus.Published && e.EndsAt <= now)
+                    .Select(e => e.Id)
+                    .ToListAsync(ct);
+            }
+
+            foreach (var examId in expired)
+            {
+                // Her sınav kendi kapsamında: biri hata verirse diğerleri etkilenmez.
+                using var scope = scopes.CreateScope();
+                await scope.ServiceProvider.GetRequiredService<ExamCompletionService>()
+                    .CompleteAsync(examId, ExamNotifier.ReasonTimeUp, null, null, ct);
+            }
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            // Bir sonraki turda yeniden denenir; servis durmaz.
+            logger.LogWarning(ex, "Süresi dolan sınavlar tamamlanamadı.");
         }
     }
 

@@ -11,6 +11,7 @@
     <DataTemplate DataType="vm:ConnectViewModel"><views:ConnectView /></DataTemplate>
     <DataTemplate DataType="vm:LobbyViewModel"><views:LobbyView /></DataTemplate>
     <DataTemplate DataType="vm:ExamPaperViewModel"><views:ExamPaperView /></DataTemplate>
+    <DataTemplate DataType="vm:SubmittedViewModel"><views:SubmittedView /></DataTemplate>
     <!-- Soru tipine göre şablon. Finalde kod sorusu şablonu buraya eklenir. -->
     <DataTemplate DataType="vm:MultipleChoiceQuestionViewModel"><views:MultipleChoiceQuestionView /></DataTemplate>
     <DataTemplate DataType="vm:ClassicQuestionViewModel"><views:ClassicQuestionView /></DataTemplate>

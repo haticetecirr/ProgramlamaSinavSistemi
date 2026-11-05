@@ -35,5 +35,11 @@ public sealed record StudentPaperDto(
     IReadOnlyList<StudentQuestionDto> Questions,
     IReadOnlyList<StudentAnswerDto> Answers);
 
+/// <summary>Otomatik kayıt. Çoktan seçmelide seçenek (boş = işaret kaldırıldı), klasikte metin.</summary>
+public sealed record SaveAnswerRequest(int? SelectedOptionId, string? TextAnswer);
+
+/// <summary>Teslim sonucu. Zaman sunucu saatidir.</summary>
+public sealed record SubmitResponse(DateTimeOffset SubmittedAt, int AnsweredCount);
+
 /// <summary>Sunucunun kalan süreyi 30 saniyede bir bildirmesi; istemcideki sayaç bununla düzeltilir.</summary>
 public sealed record TimeSyncEvent(int ExamId, int RemainingSeconds);
