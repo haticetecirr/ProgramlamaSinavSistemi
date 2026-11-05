@@ -42,6 +42,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ClassService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<QuestionService>();
+builder.Services.AddScoped<ExamService>();
 
 // JWT doğrulama. Hatalı veya süresi dolmuş token da diğer hatalarla aynı biçimde cevaplanır.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();

@@ -12,6 +12,8 @@
     <DataTemplate DataType="vm:QuestionBankViewModel"><views:QuestionBankView /></DataTemplate>
     <DataTemplate DataType="vm:QuestionEditorViewModel"><views:QuestionEditorView /></DataTemplate>
     <DataTemplate DataType="vm:CategoryDialogViewModel"><views:CategoryDialog /></DataTemplate>
+    <DataTemplate DataType="vm:ExamListViewModel"><views:ExamListView /></DataTemplate>
+    <DataTemplate DataType="vm:ExamEditorViewModel"><views:ExamEditorView /></DataTemplate>
   </Application.DataTemplates>
   <Application.Styles>
     <FluentTheme />

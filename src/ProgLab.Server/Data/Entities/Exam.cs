@@ -30,4 +30,11 @@ public class Exam
     public SchoolClass? Class { get; set; }
     public User? Creator { get; set; }
     public List<ExamQuestion> Questions { get; set; } = [];
+
+    /// <summary>
+    /// "Açık" saklanan bir durum değildir, sunucu saatinden türetilir. Bu kural yalnızca burada yazılıdır.
+    /// Bitiş anı dahil değildir: tam bitiş anında sınav kapanmış sayılır.
+    /// </summary>
+    public bool IsOpenAt(DateTimeOffset now) =>
+        Status == ExamStatus.Published && StartsAt <= now && now < EndsAt;
 }

@@ -134,6 +134,46 @@ public sealed class ApiClient(HttpClient http, TokenStore? tokens = null)
     public Task DeleteQuestionAsync(int id, CancellationToken ct = default) =>
         SendAsync(HttpMethod.Delete, $"api/questions/{id}", null, ct);
 
+    public Task<PagedResult<ExamSummaryDto>> GetExamsAsync(ExamStatus? status = null, int? classId = null, int page = 1, int pageSize = 200, CancellationToken ct = default)
+    {
+        var path = $"api/exams?page={page}&pageSize={pageSize}";
+        if (status is not null)
+        {
+            path += $"&status={status}";
+        }
+
+        if (classId is not null)
+        {
+            path += $"&classId={classId}";
+        }
+
+        return SendAsync<PagedResult<ExamSummaryDto>>(HttpMethod.Get, path, null, ct);
+    }
+
+    public Task<InstructorExamDto> GetExamAsync(int id, CancellationToken ct = default) =>
+        SendAsync<InstructorExamDto>(HttpMethod.Get, $"api/exams/{id}", null, ct);
+
+    public Task<InstructorExamDto> CreateExamAsync(SaveExamRequest request, CancellationToken ct = default) =>
+        SendAsync<InstructorExamDto>(HttpMethod.Post, "api/exams", request, ct);
+
+    public Task<InstructorExamDto> UpdateExamAsync(int id, SaveExamRequest request, CancellationToken ct = default) =>
+        SendAsync<InstructorExamDto>(HttpMethod.Put, $"api/exams/{id}", request, ct);
+
+    public Task DeleteExamAsync(int id, CancellationToken ct = default) =>
+        SendAsync(HttpMethod.Delete, $"api/exams/{id}", null, ct);
+
+    public Task<InstructorExamDto> ReplaceExamQuestionsAsync(int id, IReadOnlyList<ExamQuestionInput> questions, CancellationToken ct = default) =>
+        SendAsync<InstructorExamDto>(HttpMethod.Put, $"api/exams/{id}/questions", questions, ct);
+
+    public Task<InstructorExamDto> PublishExamAsync(int id, CancellationToken ct = default) =>
+        SendAsync<InstructorExamDto>(HttpMethod.Post, $"api/exams/{id}/publish", null, ct);
+
+    public Task<InstructorExamDto> EndExamAsync(int id, CancellationToken ct = default) =>
+        SendAsync<InstructorExamDto>(HttpMethod.Post, $"api/exams/{id}/end", null, ct);
+
+    public Task<InstructorExamDto> CopyExamAsync(int id, CancellationToken ct = default) =>
+        SendAsync<InstructorExamDto>(HttpMethod.Post, $"api/exams/{id}/copy", null, ct);
+
     private async Task<T> SendAsync<T>(HttpMethod method, string path, object? body, CancellationToken ct)
     {
         using var response = await SendCoreAsync(method, path, body, ct);

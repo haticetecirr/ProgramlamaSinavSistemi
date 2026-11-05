@@ -1,0 +1,121 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.InstructorApp.ViewModels"
+             xmlns:dto="using:ProgLab.Shared.Dtos"
+             x:Class="ProgLab.InstructorApp.Views.ExamEditorView"
+             x:DataType="vm:ExamEditorViewModel">
+  <DockPanel Margin="16">
+    <!-- Alt: yayınlama onayı, hata ve komutlar -->
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,8,0,0">
+      <Border IsVisible="{Binding IsConfirmingPublish}" Padding="10" BorderBrush="#FFB300" BorderThickness="1" CornerRadius="4">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+            <Button Classes="accent" Content="{Binding PublishText}" Command="{Binding ConfirmPublishCommand}" AutomationProperties.Name="Yayınlamayı onayla" />
+            <Button Content="Vazgeç" Command="{Binding CancelPublishCommand}" AutomationProperties.Name="Yayınlamaktan vazgeç" />
+          </StackPanel>
+          <TextBlock Text="{Binding PublishWarning}" VerticalAlignment="Center" TextWrapping="Wrap" />
+        </DockPanel>
+      </Border>
+      <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Taslak kaydet" IsVisible="{Binding IsDraft}" Command="{Binding SaveDraftCommand}" AutomationProperties.Name="Taslak kaydet" />
+        <Button Classes="accent" Content="{Binding PublishText}" IsVisible="{Binding IsDraft}" Command="{Binding AskPublishCommand}" AutomationProperties.Name="Yayınla" />
+        <Button Content="Listeye dön" Command="{Binding CloseCommand}" AutomationProperties.Name="Listeye dön" />
+        <ProgressBar Width="120" IsIndeterminate="True" IsVisible="{Binding ConfirmPublishCommand.IsRunning}" />
+      </StackPanel>
+    </StackPanel>
+
+    <TextBlock DockPanel.Dock="Top" Classes="title" Text="{Binding Heading}" Margin="0,0,0,8" />
+    <TextBlock DockPanel.Dock="Top" Text="{Binding ScheduleText}" Margin="0,0,0,8" IsVisible="{Binding ScheduleText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+
+    <Grid ColumnDefinitions="340,16,*,16,*" IsEnabled="{Binding IsDraft}">
+      <!-- Sol: sınav bilgileri -->
+      <ScrollViewer>
+        <StackPanel Spacing="6" Margin="0,0,12,0">
+          <TextBlock Text="Tür" />
+          <StackPanel Orientation="Horizontal" Spacing="16">
+            <RadioButton GroupName="examKind" Content="Sınav" IsChecked="{Binding IsExam}" AutomationProperties.Name="Sınav" />
+            <RadioButton GroupName="examKind" Content="Ödev" IsChecked="{Binding IsAssignment}" AutomationProperties.Name="Ödev" />
+          </StackPanel>
+          <TextBlock Text="Başlık" />
+          <TextBox Text="{Binding ExamTitle}" MaxLength="200" AutomationProperties.Name="Sınav başlığı" />
+          <TextBlock Text="Açıklama (isteğe bağlı)" />
+          <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" AutomationProperties.Name="Sınav açıklaması" />
+          <TextBlock Text="Hedef şube" />
+          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Classes}" SelectedItem="{Binding SelectedClass}" AutomationProperties.Name="Hedef şube">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="dto:ClassDto">
+                <TextBlock Text="{Binding Name}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+
+          <StackPanel Spacing="6" IsVisible="{Binding IsExam}">
+            <TextBlock Text="Süre (dakika)" />
+            <NumericUpDown Value="{Binding DurationMinutes}" Minimum="1" Maximum="1440" Increment="5" FormatString="0" AutomationProperties.Name="Süre" />
+            <TextBlock Text="Sınav, yayınlandığı anda başlar." Opacity="0.7" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <StackPanel Spacing="6" IsVisible="{Binding IsAssignment}">
+            <TextBlock Text="Başlangıç" />
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <CalendarDatePicker SelectedDate="{Binding StartDate}" Width="150" AutomationProperties.Name="Başlangıç tarihi" />
+              <TimePicker SelectedTime="{Binding StartTime}" MinWidth="170" ClockIdentifier="24HourClock" AutomationProperties.Name="Başlangıç saati" />
+            </StackPanel>
+            <TextBlock Text="Bitiş" />
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <CalendarDatePicker SelectedDate="{Binding EndDate}" Width="150" AutomationProperties.Name="Bitiş tarihi" />
+              <TimePicker SelectedTime="{Binding EndTime}" MinWidth="170" ClockIdentifier="24HourClock" AutomationProperties.Name="Bitiş saati" />
+            </StackPanel>
+          </StackPanel>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Orta: soru bankası -->
+      <DockPanel Grid.Column="2">
+        <TextBlock DockPanel.Dock="Top" Classes="section" Text="Soru bankası" Margin="0,0,0,6" />
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <Button DockPanel.Dock="Right" Content="Ara" Margin="6,0,0,0" Command="{Binding SearchBankCommand}" AutomationProperties.Name="Bankada ara" />
+          <TextBox Text="{Binding BankSearch}" AutomationProperties.Name="Bankada aranacak metin" />
+        </DockPanel>
+        <Button DockPanel.Dock="Bottom" Content="Sınava ekle →" Margin="0,6,0,0" Command="{Binding AddSelectedQuestionCommand}" AutomationProperties.Name="Sınava ekle" />
+        <ListBox ItemsSource="{Binding BankQuestions}" SelectedItem="{Binding SelectedBankQuestion}" AutomationProperties.Name="Banka soruları">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:QuestionRow">
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Details}" Opacity="0.7" TextWrapping="Wrap" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+
+      <!-- Sağ: sınavın soruları -->
+      <DockPanel Grid.Column="4">
+        <TextBlock DockPanel.Dock="Top" Classes="section" Text="Sınavın soruları" Margin="0,0,0,6" />
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding TotalText}" FontWeight="SemiBold" Margin="0,6,0,0" />
+        <ScrollViewer>
+          <ItemsControl ItemsSource="{Binding Questions}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:ExamQuestionRow">
+                <Border Margin="0,0,10,6" Padding="8" BorderBrush="#40808080" BorderThickness="1" CornerRadius="4">
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Details}" Opacity="0.7" TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                      <NumericUpDown Value="{Binding Points}" Width="120" Minimum="0" Maximum="9999.99" Increment="1" FormatString="0.##" AutomationProperties.Name="Soru puanı" />
+                      <Button Content="↑" Command="{Binding MoveUpCommand}" AutomationProperties.Name="Yukarı taşı" />
+                      <Button Content="↓" Command="{Binding MoveDownCommand}" AutomationProperties.Name="Aşağı taşı" />
+                      <Button Content="Çıkar" Command="{Binding RemoveCommand}" AutomationProperties.Name="Sorudan çıkar" />
+                    </StackPanel>
+                  </StackPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+    </Grid>
+  </DockPanel>
+</UserControl>

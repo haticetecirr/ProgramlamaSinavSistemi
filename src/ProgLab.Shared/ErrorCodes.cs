@@ -78,4 +78,8 @@ public static class ErrorCodes
     public const string DuplicateAnswerKey = "DUPLICATE_ANSWER_KEY";
     public const string CategoryNotFound = "CATEGORY_NOT_FOUND";
     public const string CategoryCycle = "CATEGORY_CYCLE";
+
+    // Dokümanın hata tablosunda karşılığı olmayan durumlar için Aşama 5'te eklendi
+    public const string DuplicateOrderNo = "DUPLICATE_ORDER_NO";
+    public const string ExamHasDeletedQuestion = "EXAM_HAS_DELETED_QUESTION";
 }

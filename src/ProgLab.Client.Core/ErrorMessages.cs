@@ -40,6 +40,16 @@ public static class ErrorMessages
         [ErrorCodes.InvalidPoints] = "Puan 0'dan büyük olmalıdır.",
         [ErrorCodes.UnsupportedQuestionType] = "Bu soru tipi desteklenmiyor.",
         [ErrorCodes.InvalidState] = "Bu kayıt başka bir pencerede değişti. Listeyi yenileyin.",
+        [ErrorCodes.ExamNotFound] = "Sınav bulunamadı. Listeyi yenileyin.",
+        [ErrorCodes.ExamNotDraft] = "Bu sınav yayınlanmış; yalnızca taslak sınav değiştirilebilir.",
+        [ErrorCodes.DurationRequired] = "Sınav süresini dakika olarak girin.",
+        [ErrorCodes.InvalidTimeWindow] = "Başlangıç bitişten önce, bitiş de gelecekte bir zaman olmalıdır.",
+        [ErrorCodes.ClassRequired] = "Hedef şubeyi seçin.",
+        [ErrorCodes.ClassHasNoStudents] = "Seçilen şubede öğrenci yok. Önce şubeye öğrenci ekleyin.",
+        [ErrorCodes.ExamHasNoQuestions] = "Yayınlamak için sınava en az bir soru ekleyin.",
+        [ErrorCodes.ExamHasDeletedQuestion] = "Sınavda bankadan silinmiş bir soru var. Soruyu listeden çıkarın.",
+        [ErrorCodes.DuplicateQuestion] = "Bir soru sınava bir kez eklenebilir.",
+        [ErrorCodes.DuplicateOrderNo] = "Soru sıraları benzersiz olmalıdır.",
         [ApiException.ConnectionFailed] = "Sunucuya ulaşılamadı. Sunucunun açık olduğunu ve ağ bağlantınızı kontrol edin."
     };
 
