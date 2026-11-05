@@ -1,0 +1,19 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.StudentApp.ViewModels"
+             x:Class="ProgLab.StudentApp.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+  <StackPanel Width="360" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBlock Classes="title" Text="Öğrenci Girişi" />
+    <TextBlock Text="Öğrenci numarası" />
+    <TextBox Text="{Binding StudentNumber}" AutomationProperties.Name="Öğrenci numarası" />
+    <TextBlock Text="Parola" />
+    <TextBox Text="{Binding Password}" PasswordChar="●" AutomationProperties.Name="Parola" />
+    <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    <Button Classes="accent" Content="Giriş" IsDefault="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+            Command="{Binding LoginCommand}" AutomationProperties.Name="Giriş" />
+    <ProgressBar IsIndeterminate="True" IsVisible="{Binding LoginCommand.IsRunning}" />
+    <Button Content="İlk kez giriyorum" HorizontalAlignment="Center"
+            Command="{Binding GoToFirstLoginCommand}" AutomationProperties.Name="İlk kez giriyorum" />
+  </StackPanel>
+</UserControl>

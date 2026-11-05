@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using ProgLab.Client.Core;
 using ProgLab.InstructorApp.ViewModels;
 using ProgLab.InstructorApp.Views;
 
@@ -14,7 +15,8 @@ public sealed partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel() };
+            var http = new HttpClient { BaseAddress = new Uri(ServerAddress.Default) };
+            desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel(new ApiClient(http)) };
         }
 
         base.OnFrameworkInitializationCompleted();

@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.StudentApp.ViewModels"
+             x:Class="ProgLab.StudentApp.Views.FirstLoginView"
+             x:DataType="vm:FirstLoginViewModel">
+  <StackPanel Width="360" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBlock Classes="title" Text="İlk Giriş" />
+    <TextBlock Text="Öğrenci numaranızı ve kayıtlı e-postanızı girin, ardından parolanızı belirleyin (en az 8 karakter)." TextWrapping="Wrap" />
+    <TextBlock Text="Öğrenci numarası" />
+    <TextBox Text="{Binding StudentNumber}" AutomationProperties.Name="Öğrenci numarası" />
+    <TextBlock Text="Okul e-postası" />
+    <TextBox Text="{Binding Email}" AutomationProperties.Name="Okul e-postası" />
+    <TextBlock Text="Yeni parola" />
+    <TextBox Text="{Binding NewPassword}" PasswordChar="●" AutomationProperties.Name="Yeni parola" />
+    <TextBlock Text="Yeni parola (tekrar)" />
+    <TextBox Text="{Binding NewPasswordRepeat}" PasswordChar="●" AutomationProperties.Name="Yeni parola tekrar" />
+    <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    <Button Classes="accent" Content="Parolamı belirle ve giriş yap" IsDefault="True" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+            Command="{Binding SubmitCommand}" AutomationProperties.Name="Parolamı belirle ve giriş yap" />
+    <ProgressBar IsIndeterminate="True" IsVisible="{Binding SubmitCommand.IsRunning}" />
+    <Button Content="Girişe dön" HorizontalAlignment="Center" Command="{Binding BackCommand}" AutomationProperties.Name="Girişe dön" />
+  </StackPanel>
+</UserControl>

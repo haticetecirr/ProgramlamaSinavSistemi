@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ProgLab.Server.Data.Entities;
 using ProgLab.Server.Grading;
+using ProgLab.Server.Security;
 using ProgLab.Shared.Enums;
 
 namespace ProgLab.Server.Data.Seed;
@@ -12,7 +13,6 @@ namespace ProgLab.Server.Data.Seed;
 public static class DemoDataSeeder
 {
     private const string InstructorUsername = "egitmen";
-    private const int BcryptWorkFactor = 11;
     private const int DemoStudentCount = 30;
     private const decimal DemoQuestionPoints = 10m;
 
@@ -41,7 +41,7 @@ public static class DemoDataSeeder
             Username = InstructorUsername,
             FullName = "Demo Eğitmen",
             Role = UserRole.Instructor,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(temporaryPassword, BcryptWorkFactor),
+            PasswordHash = PasswordHasher.Hash(temporaryPassword),
             MustChangePassword = true
         });
 

@@ -59,4 +59,17 @@ public static class ErrorCodes
     public const string QuestionNotFound = "QUESTION_NOT_FOUND";
     public const string ExamNotFound = "EXAM_NOT_FOUND";
     public const string LogFileNotFound = "LOG_FILE_NOT_FOUND";
+
+    // Dokümanın hata tablosunda karşılığı olmayan durumlar için Aşama 3'te eklendi
+    public const string Forbidden = "FORBIDDEN";
+    public const string InvalidRequest = "INVALID_REQUEST";
+    public const string DatabaseUnavailable = "DATABASE_UNAVAILABLE";
+    public const string PasswordTooShort = "PASSWORD_TOO_SHORT";
+    public const string UsernameExists = "USERNAME_EXISTS";
+    public const string EmailExists = "EMAIL_EXISTS";
+    public const string UserNotFound = "USER_NOT_FOUND";
+    public const string ClassNotFound = "CLASS_NOT_FOUND";
+    public const string ClassNameExists = "CLASS_NAME_EXISTS";
+    public const string ClassHasExams = "CLASS_HAS_EXAMS";
+    public const string InvalidStudent = "INVALID_STUDENT";
 }
