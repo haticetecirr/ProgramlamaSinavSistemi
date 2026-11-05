@@ -2,7 +2,7 @@
 
 Yerel ağda çalışan masaüstü sınav platformu. C#, .NET 10, Avalonia UI, ASP.NET Core ve PostgreSQL ile geliştirilir.
 
-Şu anki durum: **Vize — Aşama 1 (solution ve proje altyapısı)**.
+Şu anki durum: **Vize — Aşama 2 (PostgreSQL veritabanı ve migration'lar)**.
 
 ## Projeler
 
@@ -36,3 +36,19 @@ Sunucu şimdilik `http://localhost:5000` adresinde çalışır; sağlık kontrol
 ## Gizli ayarlar
 
 Gizli değerler `src/ProgLab.Server/appsettings.Local.json` dosyasında durur ve Git'e girmez. Örnek biçim için `appsettings.Local.example.json` dosyasına bakın.
+
+## Veritabanı kurulumu
+
+PostgreSQL 16 veya üzeri kurulu olmalıdır. Aşağıdaki betik sınırlı yetkili `proglab_app` kullanıcısını, `proglab` ve `proglab_test` veritabanlarını oluşturur, parolaları üretip `appsettings.Local.json` dosyasına yazar. Betik yönetici (`postgres`) parolasını sorar, hiçbir şeyi silmez. PostgreSQL yolu betikte 18 sürümüne göre yazılıdır.
+
+```bash
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\setup-local-db.ps1
+```
+
+Sunucu her açılışta migration'ları uygular ve eksikse demo verisini ekler. Testler `proglab_test` içinde geçici şemalarda çalışır, `proglab` veritabanına dokunmaz.
+
+Şema değişikliği için yeni migration:
+
+```bash
+dotnet ef migrations add MigrationAdi --project src/ProgLab.Server --output-dir Data/Migrations
+```
