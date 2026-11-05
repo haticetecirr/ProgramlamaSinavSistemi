@@ -20,6 +20,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsLoggedIn))]
     private string? _userName;
 
+    /// <summary>Parola değiştirme zorunluluğu varken menü gizlenir.</summary>
+    [ObservableProperty]
+    private bool _canNavigate;
+
     public MainWindowViewModel(ApiClient api)
     {
         _api = api;
@@ -36,9 +40,36 @@ public sealed partial class MainWindowViewModel : ObservableObject
         ShowLogin();
     }
 
+    [RelayCommand]
+    private void ShowClasses()
+    {
+        CanNavigate = true;
+        var page = new ClassesViewModel(_api);
+        CurrentPage = page;
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
+    [RelayCommand]
+    private void ShowQuestionBank() => OpenQuestionBank(null);
+
+    private void OpenQuestionBank(string? message)
+    {
+        var page = new QuestionBankViewModel(_api, OpenQuestionEditor, message);
+        CurrentPage = page;
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void OpenQuestionEditor(int? questionId)
+    {
+        var page = new QuestionEditorViewModel(_api, questionId, OpenQuestionBank);
+        CurrentPage = page;
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
     private void ShowLogin(string? message = null)
     {
         UserName = null;
+        CanNavigate = false;
         CurrentPage = new LoginViewModel(_api, OnLoggedIn, message);
     }
 
@@ -53,12 +84,5 @@ public sealed partial class MainWindowViewModel : ObservableObject
         {
             ShowClasses();
         }
-    }
-
-    private void ShowClasses()
-    {
-        var page = new ClassesViewModel(_api);
-        CurrentPage = page;
-        _ = page.LoadCommand.ExecuteAsync(null);
     }
 }

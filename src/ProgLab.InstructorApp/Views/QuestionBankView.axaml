@@ -1,0 +1,91 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.InstructorApp.ViewModels"
+             x:Class="ProgLab.InstructorApp.Views.QuestionBankView"
+             x:DataType="vm:QuestionBankViewModel">
+  <Grid>
+    <Grid ColumnDefinitions="280,*" RowDefinitions="Auto,Auto,*" Margin="16">
+      <TextBlock Grid.ColumnSpan="2" Classes="title" Text="Soru Bankası" Margin="0,0,0,8" />
+      <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,8">
+        <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+        <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" IsVisible="{Binding StatusMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      </StackPanel>
+
+      <!-- Sol: kategoriler -->
+      <DockPanel Grid.Row="2" Margin="0,0,16,0">
+        <StackPanel DockPanel.Dock="Top" Spacing="6" Margin="0,0,0,8">
+          <TextBlock Classes="section" Text="Kategoriler" />
+          <Button Content="Tüm kategoriler" Command="{Binding ClearCategoryFilterCommand}" AutomationProperties.Name="Tüm kategoriler" />
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="6" Margin="0,8,0,0">
+          <Button Content="Ekle" Command="{Binding AddCategoryCommand}" AutomationProperties.Name="Kategori ekle" />
+          <Button Content="Düzenle" Command="{Binding EditCategoryCommand}" AutomationProperties.Name="Kategori düzenle" />
+          <Button Content="Sil" Command="{Binding DeleteCategoryCommand}" AutomationProperties.Name="Kategori sil" />
+        </StackPanel>
+        <TreeView ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" AutomationProperties.Name="Kategori ağacı">
+          <TreeView.ItemTemplate>
+            <TreeDataTemplate x:DataType="vm:CategoryNode" ItemsSource="{Binding Children}">
+              <TextBlock Text="{Binding Name}" />
+            </TreeDataTemplate>
+          </TreeView.ItemTemplate>
+        </TreeView>
+      </DockPanel>
+
+      <!-- Sağ: filtreler ve sorular -->
+      <DockPanel Grid.Row="2" Grid.Column="1">
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+          <Button DockPanel.Dock="Right" Classes="accent" Content="Yeni soru" Command="{Binding NewQuestionCommand}" Margin="8,0,0,0" AutomationProperties.Name="Yeni soru" />
+          <Button DockPanel.Dock="Right" Content="Ara" Command="{Binding SearchCommand}" IsDefault="True" Margin="8,0,0,0" AutomationProperties.Name="Ara" />
+          <ComboBox DockPanel.Dock="Right" Width="170" Margin="8,0,0,0" PlaceholderText="Tüm tipler"
+                    ItemsSource="{Binding TypeFilters}" SelectedItem="{Binding SelectedTypeFilter}" AutomationProperties.Name="Soru tipi filtresi">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:QuestionTypeFilter">
+                <TextBlock Text="{Binding Label}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <TextBox Text="{Binding SearchText}" AutomationProperties.Name="Soru ara" />
+        </DockPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,8,0,0">
+          <Border IsVisible="{Binding IsConfirmingDelete}" Padding="10" BorderBrush="#EF5350" BorderThickness="1" CornerRadius="4">
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+                <Button Content="Evet, sil" Command="{Binding ConfirmDeleteQuestionCommand}" AutomationProperties.Name="Evet, sil" />
+                <Button Content="Vazgeç" Command="{Binding CancelDeleteQuestionCommand}" AutomationProperties.Name="Silmekten vazgeç" />
+              </StackPanel>
+              <TextBlock Text="{Binding PendingDelete.Title, StringFormat='&quot;{0}&quot; bankadan silinsin mi?'}" VerticalAlignment="Center" TextWrapping="Wrap" />
+            </DockPanel>
+          </Border>
+          <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8">
+              <Button Content="Önceki" Command="{Binding PreviousPageCommand}" AutomationProperties.Name="Önceki sayfa" />
+              <Button Content="Sonraki" Command="{Binding NextPageCommand}" AutomationProperties.Name="Sonraki sayfa" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <Button Content="Düzenle" Command="{Binding EditQuestionCommand}" AutomationProperties.Name="Soruyu düzenle" />
+              <Button Content="Sil" Command="{Binding AskDeleteQuestionCommand}" AutomationProperties.Name="Soruyu sil" />
+              <TextBlock Text="{Binding PageText}" VerticalAlignment="Center" Opacity="0.7" Margin="8,0,0,0" />
+            </StackPanel>
+          </DockPanel>
+        </StackPanel>
+
+        <ListBox ItemsSource="{Binding Questions}" SelectedItem="{Binding SelectedQuestion}" AutomationProperties.Name="Soru listesi">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:QuestionRow">
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Details}" Opacity="0.7" TextWrapping="Wrap" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Grid>
+
+    <!-- Kategori penceresi: arka planı kapatan katman -->
+    <Border Background="#99000000" IsVisible="{Binding IsCategoryDialogOpen}">
+      <ContentControl Content="{Binding CategoryDialog}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+    </Border>
+  </Grid>
+</UserControl>

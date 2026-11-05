@@ -9,6 +9,9 @@
     <DataTemplate DataType="vm:LoginViewModel"><views:LoginView /></DataTemplate>
     <DataTemplate DataType="vm:ChangePasswordViewModel"><views:ChangePasswordView /></DataTemplate>
     <DataTemplate DataType="vm:ClassesViewModel"><views:ClassesView /></DataTemplate>
+    <DataTemplate DataType="vm:QuestionBankViewModel"><views:QuestionBankView /></DataTemplate>
+    <DataTemplate DataType="vm:QuestionEditorViewModel"><views:QuestionEditorView /></DataTemplate>
+    <DataTemplate DataType="vm:CategoryDialogViewModel"><views:CategoryDialog /></DataTemplate>
   </Application.DataTemplates>
   <Application.Styles>
     <FluentTheme />

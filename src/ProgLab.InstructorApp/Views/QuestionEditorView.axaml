@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.InstructorApp.ViewModels"
+             x:Class="ProgLab.InstructorApp.Views.QuestionEditorView"
+             x:DataType="vm:QuestionEditorViewModel">
+  <DockPanel Margin="16">
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,8,0,0">
+      <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Classes="accent" Content="Kaydet" Command="{Binding SaveCommand}" AutomationProperties.Name="Soruyu kaydet" />
+        <Button Content="Vazgeç" Command="{Binding CancelCommand}" AutomationProperties.Name="Sorudan vazgeç" />
+        <ProgressBar Width="120" IsIndeterminate="True" IsVisible="{Binding SaveCommand.IsRunning}" />
+      </StackPanel>
+    </StackPanel>
+
+    <ScrollViewer>
+      <StackPanel Spacing="8" Width="760" HorizontalAlignment="Left" Margin="0,0,16,0">
+        <TextBlock Classes="title" Text="{Binding Heading}" />
+
+        <Border IsVisible="{Binding IsLocked}" Padding="10" BorderBrush="#FFB300" BorderThickness="1" CornerRadius="4">
+          <TextBlock TextWrapping="Wrap" Text="Bu soru yayınlanmış bir sınavda kullanıldı. Kaydedince yeni sürüm oluşturulacak; yayınlanmış sınavlar eski sürümü kullanmaya devam eder." />
+        </Border>
+
+        <TextBlock Text="Soru tipi" />
+        <StackPanel Orientation="Horizontal" Spacing="16">
+          <RadioButton GroupName="questionType" Content="Çoktan seçmeli" IsChecked="{Binding IsMultipleChoice}" AutomationProperties.Name="Çoktan seçmeli" />
+          <RadioButton GroupName="questionType" Content="Klasik" IsChecked="{Binding IsClassic}" AutomationProperties.Name="Klasik" />
+        </StackPanel>
+
+        <TextBlock Text="Başlık (listede görünür)" />
+        <TextBox Text="{Binding Title}" MaxLength="200" AutomationProperties.Name="Başlık" />
+
+        <TextBlock Text="Soru metni" />
+        <TextBox Text="{Binding Text}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="90" AutomationProperties.Name="Soru metni" />
+
+        <Grid ColumnDefinitions="*,16,180" RowDefinitions="Auto,Auto">
+          <TextBlock Text="Kategori" />
+          <ComboBox Grid.Row="1" HorizontalAlignment="Stretch" ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" AutomationProperties.Name="Kategori">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:CategoryOption">
+                <TextBlock Text="{Binding Label}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <TextBlock Grid.Column="2" Text="Varsayılan puan" />
+          <NumericUpDown Grid.Row="1" Grid.Column="2" Value="{Binding DefaultPoints}" Minimum="0" Maximum="9999.99" Increment="1" FormatString="0.##" AutomationProperties.Name="Varsayılan puan" />
+        </Grid>
+
+        <!-- Çoktan seçmeli -->
+        <StackPanel Spacing="6" IsVisible="{Binding IsMultipleChoice}">
+          <TextBlock Classes="section" Text="Seçenekler" Margin="0,8,0,0" />
+          <TextBlock Text="Doğru seçeneği soldaki düğmeyle işaretleyin (2–6 seçenek, tam olarak bir doğru)." Opacity="0.7" TextWrapping="Wrap" />
+          <ItemsControl ItemsSource="{Binding Options}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:OptionRow">
+                <DockPanel Margin="0,3">
+                  <RadioButton DockPanel.Dock="Left" GroupName="correctOption" IsChecked="{Binding IsCorrect}" AutomationProperties.Name="Doğru seçenek" />
+                  <Button DockPanel.Dock="Right" Content="Kaldır" Margin="8,0,0,0" Command="{Binding RemoveCommand}" AutomationProperties.Name="Seçeneği kaldır" />
+                  <TextBox Text="{Binding Text}" MaxLength="500" AutomationProperties.Name="Seçenek metni" />
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Content="Seçenek ekle" Command="{Binding AddOptionCommand}" AutomationProperties.Name="Seçenek ekle" />
+        </StackPanel>
+
+        <!-- Klasik -->
+        <StackPanel Spacing="6" IsVisible="{Binding IsClassic}">
+          <TextBlock Classes="section" Text="Kabul edilen cevaplar" Margin="0,8,0,0" />
+          <TextBlock Text="{Binding ClassicGradingNote}" Opacity="0.7" TextWrapping="Wrap" />
+          <ItemsControl ItemsSource="{Binding AnswerKeys}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:AnswerKeyRow">
+                <DockPanel Margin="0,3">
+                  <Button DockPanel.Dock="Right" Content="Kaldır" Margin="8,0,0,0" Command="{Binding RemoveCommand}" AutomationProperties.Name="Cevabı kaldır" />
+                  <TextBox Text="{Binding Text}" MaxLength="500" AutomationProperties.Name="Kabul edilen cevap" />
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Content="Cevap ekle" Command="{Binding AddAnswerKeyCommand}" AutomationProperties.Name="Cevap ekle" />
+        </StackPanel>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

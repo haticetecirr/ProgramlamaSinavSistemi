@@ -89,6 +89,51 @@ public sealed class ApiClient(HttpClient http, TokenStore? tokens = null)
     public Task<ClassDetailDto> ReplaceClassMembersAsync(int id, IReadOnlyList<int> studentIds, CancellationToken ct = default) =>
         SendAsync<ClassDetailDto>(HttpMethod.Put, $"api/classes/{id}/members", new UpdateMembersRequest(studentIds), ct);
 
+    public Task<IReadOnlyList<CategoryDto>> GetCategoriesAsync(CancellationToken ct = default) =>
+        SendAsync<IReadOnlyList<CategoryDto>>(HttpMethod.Get, "api/categories", null, ct);
+
+    public Task<CategoryDto> CreateCategoryAsync(string name, int? parentId, CancellationToken ct = default) =>
+        SendAsync<CategoryDto>(HttpMethod.Post, "api/categories", new SaveCategoryRequest(name, parentId), ct);
+
+    public Task<CategoryDto> UpdateCategoryAsync(int id, string name, int? parentId, CancellationToken ct = default) =>
+        SendAsync<CategoryDto>(HttpMethod.Put, $"api/categories/{id}", new SaveCategoryRequest(name, parentId), ct);
+
+    public Task DeleteCategoryAsync(int id, CancellationToken ct = default) =>
+        SendAsync(HttpMethod.Delete, $"api/categories/{id}", null, ct);
+
+    public Task<PagedResult<QuestionSummaryDto>> GetQuestionsAsync(int? categoryId = null, QuestionType? type = null, string? search = null, int page = 1, int pageSize = 50, CancellationToken ct = default)
+    {
+        var path = $"api/questions?page={page}&pageSize={pageSize}";
+        if (categoryId is not null)
+        {
+            path += $"&categoryId={categoryId}";
+        }
+
+        if (type is not null)
+        {
+            path += $"&type={type}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            path += $"&search={Uri.EscapeDataString(search)}";
+        }
+
+        return SendAsync<PagedResult<QuestionSummaryDto>>(HttpMethod.Get, path, null, ct);
+    }
+
+    public Task<InstructorQuestionDto> GetQuestionAsync(int id, CancellationToken ct = default) =>
+        SendAsync<InstructorQuestionDto>(HttpMethod.Get, $"api/questions/{id}", null, ct);
+
+    public Task<InstructorQuestionDto> CreateQuestionAsync(SaveQuestionRequest request, CancellationToken ct = default) =>
+        SendAsync<InstructorQuestionDto>(HttpMethod.Post, "api/questions", request, ct);
+
+    public Task<UpdateQuestionResponse> UpdateQuestionAsync(int id, SaveQuestionRequest request, CancellationToken ct = default) =>
+        SendAsync<UpdateQuestionResponse>(HttpMethod.Put, $"api/questions/{id}", request, ct);
+
+    public Task DeleteQuestionAsync(int id, CancellationToken ct = default) =>
+        SendAsync(HttpMethod.Delete, $"api/questions/{id}", null, ct);
+
     private async Task<T> SendAsync<T>(HttpMethod method, string path, object? body, CancellationToken ct)
     {
         using var response = await SendCoreAsync(method, path, body, ct);
