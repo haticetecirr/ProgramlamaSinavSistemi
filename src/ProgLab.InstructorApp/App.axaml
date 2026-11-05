@@ -8,6 +8,7 @@
   <Application.DataTemplates>
     <DataTemplate DataType="vm:LoginViewModel"><views:LoginView /></DataTemplate>
     <DataTemplate DataType="vm:ChangePasswordViewModel"><views:ChangePasswordView /></DataTemplate>
+    <DataTemplate DataType="vm:DashboardViewModel"><views:DashboardView /></DataTemplate>
     <DataTemplate DataType="vm:ClassesViewModel"><views:ClassesView /></DataTemplate>
     <DataTemplate DataType="vm:QuestionBankViewModel"><views:QuestionBankView /></DataTemplate>
     <DataTemplate DataType="vm:QuestionEditorViewModel"><views:QuestionEditorView /></DataTemplate>

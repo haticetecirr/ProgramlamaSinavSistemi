@@ -40,6 +40,10 @@ public sealed class InstructorViewModelFlowTests(MigratedDatabaseFixture fixture
 
         change.NewPasswordRepeat = "Yeni-Parola-123";
         await change.ChangeCommand.ExecuteAsync(null);
+        await Assert.IsType<Instructor.DashboardViewModel>(main.CurrentPage).LoadCommand.ExecutionTask!;
+        Assert.True(main.CanNavigate);
+
+        main.ShowClassesCommand.Execute(null);
         var classes = Assert.IsType<Instructor.ClassesViewModel>(main.CurrentPage);
 
         // Şube listesi ve üyeler ekran açılırken kendiliğinden yüklenir.
@@ -127,8 +131,8 @@ public sealed class StudentViewModelFlowTests(MigratedDatabaseFixture fixture) :
 
         first.NewPasswordRepeat = first.NewPassword;
         await first.SubmitCommand.ExecuteAsync(null);
-        var home = Assert.IsType<Student.HomeViewModel>(main.CurrentPage);
-        Assert.Equal("Hoş geldiniz, Demo Öğrenci 1.", home.Greeting);
+        var lobby = Assert.IsType<Student.LobbyViewModel>(main.CurrentPage);
+        Assert.Equal("Hoş geldiniz, Demo Öğrenci 1.", lobby.Greeting);
         Assert.Equal("Demo Öğrenci 1", main.UserName);
 
         main.LogoutCommand.Execute(null);
@@ -137,7 +141,8 @@ public sealed class StudentViewModelFlowTests(MigratedDatabaseFixture fixture) :
         again.StudentNumber = number;
         again.Password = "Ogrenci-Parola-1";
         await again.LoginCommand.ExecuteAsync(null);
-        Assert.IsType<Student.HomeViewModel>(main.CurrentPage);
+        Assert.IsType<Student.LobbyViewModel>(main.CurrentPage);
+        main.LogoutCommand.Execute(null); // Lobinin aralıklı yenilemesini durdurur.
     }
 
     [Fact]

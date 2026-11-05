@@ -174,6 +174,12 @@ public sealed class ApiClient(HttpClient http, TokenStore? tokens = null)
     public Task<InstructorExamDto> CopyExamAsync(int id, CancellationToken ct = default) =>
         SendAsync<InstructorExamDto>(HttpMethod.Post, $"api/exams/{id}/copy", null, ct);
 
+    public Task<IReadOnlyList<StudentExamSummaryDto>> GetLobbyAsync(CancellationToken ct = default) =>
+        SendAsync<IReadOnlyList<StudentExamSummaryDto>>(HttpMethod.Get, "api/student/exams", null, ct);
+
+    public Task<IReadOnlyList<StudentConnectionDto>> GetConnectedStudentsAsync(CancellationToken ct = default) =>
+        SendAsync<IReadOnlyList<StudentConnectionDto>>(HttpMethod.Get, "api/connections/students", null, ct);
+
     private async Task<T> SendAsync<T>(HttpMethod method, string path, object? body, CancellationToken ct)
     {
         using var response = await SendCoreAsync(method, path, body, ct);

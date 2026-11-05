@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.StudentApp.ViewModels"
+             x:Class="ProgLab.StudentApp.Views.ConnectView"
+             x:DataType="vm:ConnectViewModel">
+  <StackPanel Width="480" Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBlock Classes="title" Text="Sunucuya Bağlan" />
+
+    <TextBlock Classes="section" Text="Ağda bulunan sunucular" />
+    <TextBlock Text="Eğitmen bilgisayarı aynı ağdaysa burada kendiliğinden görünür. Birkaç saniye bekleyin." Opacity="0.7" TextWrapping="Wrap" />
+    <ListBox Height="130" ItemsSource="{Binding Servers}" SelectedItem="{Binding SelectedServer}" AutomationProperties.Name="Bulunan sunucular">
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:DiscoveredServerRow">
+          <StackPanel>
+            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding Details}" Opacity="0.7" />
+          </StackPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+    <Button Classes="accent" Content="Seçili sunucuya bağlan" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+            Command="{Binding ConnectSelectedCommand}" AutomationProperties.Name="Seçili sunucuya bağlan" />
+
+    <TextBlock Classes="section" Text="Elle bağlan" Margin="0,8,0,0" />
+    <TextBlock Text="Sunucu listede yoksa eğitmenin verdiği IP adresini yazın." Opacity="0.7" TextWrapping="Wrap" />
+    <DockPanel>
+      <Button DockPanel.Dock="Right" Content="Bağlan" Margin="8,0,0,0" IsDefault="True"
+              Command="{Binding ConnectManualCommand}" AutomationProperties.Name="Elle bağlan" />
+      <TextBox Text="{Binding ManualAddress}" AutomationProperties.Name="Sunucu adresi" />
+    </DockPanel>
+
+    <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" IsVisible="{Binding StatusMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    <Button Content="Kayıtlı sertifikayı sil" IsVisible="{Binding CanForgetCertificate}"
+            Command="{Binding ForgetCertificateCommand}" AutomationProperties.Name="Kayıtlı sertifikayı sil" />
+    <ProgressBar IsIndeterminate="True" IsVisible="{Binding ConnectManualCommand.IsRunning}" />
+    <ProgressBar IsIndeterminate="True" IsVisible="{Binding ConnectSelectedCommand.IsRunning}" />
+  </StackPanel>
+</UserControl>

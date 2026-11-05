@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using ProgLab.Client.Core;
 using ProgLab.StudentApp.ViewModels;
 using ProgLab.StudentApp.Views;
@@ -15,8 +16,13 @@ public sealed partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            var http = new HttpClient { BaseAddress = new Uri(ServerAddress.Default) };
-            desktop.MainWindow = new MainWindow { DataContext = new MainWindowViewModel(new ApiClient(http)) };
+            var store = LocalClientStore.ForApp("StudentApp");
+            var main = new MainWindowViewModel(
+                ServerSessionFactory.Pinned(store),
+                new ServerDiscovery(),
+                store,
+                action => Dispatcher.UIThread.Post(action)); // Ağdan gelen olaylar arayüz iş parçacığına taşınır.
+            desktop.MainWindow = new MainWindow { DataContext = main };
         }
 
         base.OnFrameworkInitializationCompleted();

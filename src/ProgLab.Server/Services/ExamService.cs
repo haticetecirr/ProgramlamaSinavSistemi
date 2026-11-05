@@ -12,7 +12,7 @@ using ProgLab.Shared.Enums;
 namespace ProgLab.Server.Services;
 
 /// <summary>Sınav ve ödev yaşam döngüsü: taslak, soru listesi, yayınlama, bitirme, kopyalama.</summary>
-public sealed class ExamService(AppDbContext db)
+public sealed class ExamService(AppDbContext db, ExamNotifier notifier)
 {
     private const int MaxPageSize = 200;
 
@@ -197,6 +197,9 @@ public sealed class ExamService(AppDbContext db)
         await db.SaveChangesAsync(ct);
         await transaction.CommitAsync(ct);
 
+        // Bildirim yalnızca işlem kalıcı olduktan sonra gider.
+        await notifier.ExamPublishedAsync(exam);
+
         return await GetFreshAsync(id, ct);
     }
 
@@ -221,9 +224,10 @@ public sealed class ExamService(AppDbContext db)
         exam.CompletedAt = now;
         exam.UpdatedAt = now;
 
-        Log(ActivityEvents.ExamEnded, exam.Id, userId, ip, new { reason = "Manual" });
+        Log(ActivityEvents.ExamEnded, exam.Id, userId, ip, new { reason = ExamNotifier.ReasonManual });
 
         await db.SaveChangesAsync(ct);
+        await notifier.ExamEndedAsync(exam, ExamNotifier.ReasonManual);
 
         return await GetFreshAsync(id, ct);
     }

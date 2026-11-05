@@ -4,20 +4,25 @@
         x:Class="ProgLab.InstructorApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="{Binding Title}"
-        Width="1100" Height="720"
+        Width="1100" Height="760"
         WindowStartupLocation="CenterScreen">
   <DockPanel>
     <Border DockPanel.Dock="Top" Padding="16,8" IsVisible="{Binding IsLoggedIn}"
             BorderBrush="#40808080" BorderThickness="0,0,0,1">
       <DockPanel>
-        <Button DockPanel.Dock="Right" Content="Çıkış" Command="{Binding LogoutCommand}" />
+        <Button DockPanel.Dock="Right" Content="Çıkış" Command="{Binding LogoutCommand}" AutomationProperties.Name="Çıkış" />
         <TextBlock DockPanel.Dock="Right" Text="{Binding UserName}" VerticalAlignment="Center" Margin="0,0,12,0" />
         <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding CanNavigate}">
+          <Button Content="Ana Sayfa" Command="{Binding ShowDashboardCommand}" AutomationProperties.Name="Ana Sayfa" />
           <Button Content="Şubeler" Command="{Binding ShowClassesCommand}" AutomationProperties.Name="Şubeler" />
           <Button Content="Soru Bankası" Command="{Binding ShowQuestionBankCommand}" AutomationProperties.Name="Soru Bankası" />
           <Button Content="Sınavlar" Command="{Binding ShowExamsCommand}" AutomationProperties.Name="Sınavlar" />
         </StackPanel>
       </DockPanel>
+    </Border>
+    <Border DockPanel.Dock="Bottom" Padding="16,6" IsVisible="{Binding CanNavigate}"
+            BorderBrush="#40808080" BorderThickness="0,1,0,0">
+      <TextBlock Text="{Binding Live.StatusBarText}" Opacity="0.8" TextTrimming="CharacterEllipsis" />
     </Border>
     <ContentControl Content="{Binding CurrentPage}" />
   </DockPanel>

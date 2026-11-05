@@ -50,7 +50,7 @@ public static class ErrorMessages
         [ErrorCodes.ExamHasDeletedQuestion] = "Sınavda bankadan silinmiş bir soru var. Soruyu listeden çıkarın.",
         [ErrorCodes.DuplicateQuestion] = "Bir soru sınava bir kez eklenebilir.",
         [ErrorCodes.DuplicateOrderNo] = "Soru sıraları benzersiz olmalıdır.",
-        [ApiException.ConnectionFailed] = "Sunucuya ulaşılamadı. Sunucunun açık olduğunu ve ağ bağlantınızı kontrol edin."
+        [ApiException.ConnectionFailed] = "Sunucuya ulaşılamadı. Sunucunun açık olduğunu, adresi ve ağ bağlantınızı kontrol edin; güvenlik duvarı engelliyor olabilir."
     };
 
     public static string For(string? code, string? serverTitle = null) =>

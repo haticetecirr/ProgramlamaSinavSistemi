@@ -15,5 +15,9 @@
     <ProgressBar IsIndeterminate="True" IsVisible="{Binding LoginCommand.IsRunning}" />
     <Button Content="İlk kez giriyorum" HorizontalAlignment="Center"
             Command="{Binding GoToFirstLoginCommand}" AutomationProperties.Name="İlk kez giriyorum" />
+    <TextBlock Text="{Binding ServerText, StringFormat='Sunucu: {0}'}" HorizontalAlignment="Center" Opacity="0.7"
+               IsVisible="{Binding ServerText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    <Button Content="Sunucuyu değiştir" HorizontalAlignment="Center" IsVisible="{Binding CanChangeServer}"
+            Command="{Binding ChangeServerCommand}" AutomationProperties.Name="Sunucuyu değiştir" />
   </StackPanel>
 </UserControl>

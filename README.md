@@ -2,7 +2,7 @@
 
 Yerel ağda çalışan masaüstü sınav platformu. C#, .NET 10, Avalonia UI, ASP.NET Core ve PostgreSQL ile geliştirilir.
 
-Şu anki durum: **Vize — Aşama 5 (sınav oluşturma)**.
+Şu anki durum: **Vize — Aşama 6 (sunucu–istemci bağlantısı)**.
 
 ## Projeler
 
@@ -31,7 +31,21 @@ dotnet test
 dotnet run --project src/ProgLab.Server
 ```
 
-Sunucu şimdilik `http://localhost:5000` adresinde çalışır; sağlık kontrolü `http://localhost:5000/api/health` adresindedir. HTTPS ve LAN erişimi Aşama 6'da eklenir.
+Sunucu `https://0.0.0.0:5000` adresini dinler; sağlık kontrolü `https://localhost:5000/api/health` adresindedir. Sertifika öz imzalıdır ve ilk açılışta `src/ProgLab.Server/certs/server.pfx` olarak üretilir (Git'e girmez).
+
+## Yerel ağda kullanım
+
+Eğitmen bilgisayarı sunucudur. Öğrenci uygulaması sunucuyu UDP duyurusuyla kendiliğinden bulur; bulamazsa eğitmen ana sayfasındaki adres elle yazılır.
+
+Eğitmen bilgisayarında, yönetici olarak açılmış PowerShell'de güvenlik duvarı izinleri (TCP 5000, UDP 47777):
+
+```bash
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\firewall-windows.ps1
+```
+
+Linux için `scripts/firewall-linux.sh`. Öğrenci bilgisayarında sunucu listede görünmüyorsa isteğe bağlı olarak `scripts/firewall-student-windows.ps1` çalıştırılabilir veya adres elle yazılır.
+
+Öğrenci, sunucunun sertifika parmak izini ilk bağlantıda kaydeder ve sonraki bağlantılarda yalnızca ona güvenir. Sertifika değişirse bağlantı reddedilir. Öğrenci kayıtları `%AppData%\ProgLab\StudentApp\client.json` dosyasındadır.
 
 ## Gizli ayarlar
 
