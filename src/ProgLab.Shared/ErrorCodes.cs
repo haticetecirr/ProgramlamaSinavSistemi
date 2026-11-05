@@ -72,4 +72,10 @@ public static class ErrorCodes
     public const string ClassNameExists = "CLASS_NAME_EXISTS";
     public const string ClassHasExams = "CLASS_HAS_EXAMS";
     public const string InvalidStudent = "INVALID_STUDENT";
+
+    // Dokümanın hata tablosunda karşılığı olmayan durumlar için Aşama 4'te eklendi
+    public const string UnsupportedQuestionType = "UNSUPPORTED_QUESTION_TYPE";
+    public const string DuplicateAnswerKey = "DUPLICATE_ANSWER_KEY";
+    public const string CategoryNotFound = "CATEGORY_NOT_FOUND";
+    public const string CategoryCycle = "CATEGORY_CYCLE";
 }

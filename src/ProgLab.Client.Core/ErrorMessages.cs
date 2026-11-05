@@ -27,6 +27,19 @@ public static class ErrorMessages
         [ErrorCodes.ClassNameExists] = "Bu dönemde aynı adlı bir şube var.",
         [ErrorCodes.ClassHasExams] = "İçinde sınav olan şube silinemez.",
         [ErrorCodes.InvalidStudent] = "Listede öğrenci olmayan bir kullanıcı var.",
+        [ErrorCodes.CategoryNotEmpty] = "İçinde soru veya alt kategori bulunan kategori silinemez. Silinmiş soruların geçmiş kayıtları da sayılır.",
+        [ErrorCodes.CategoryNameExists] = "Aynı seviyede bu adda bir kategori var.",
+        [ErrorCodes.CategoryNotFound] = "Kategori bulunamadı. Listeyi yenileyin.",
+        [ErrorCodes.CategoryCycle] = "Kategori kendi alt kategorisinin altına taşınamaz.",
+        [ErrorCodes.QuestionNotFound] = "Soru bulunamadı. Listeyi yenileyin.",
+        [ErrorCodes.McqOptionCount] = "Çoktan seçmeli soruda 2 ile 6 arasında seçenek olmalıdır.",
+        [ErrorCodes.McqNoCorrectOption] = "Doğru seçeneği işaretleyin.",
+        [ErrorCodes.McqMultipleCorrect] = "Yalnızca bir doğru seçenek olabilir.",
+        [ErrorCodes.ClassicNoAnswerKey] = "Klasik soruda en az bir kabul edilen cevap olmalıdır.",
+        [ErrorCodes.DuplicateAnswerKey] = "Aynı kabul edilen cevap iki kez yazılmış (büyük/küçük harf ve sondaki noktalama fark etmez).",
+        [ErrorCodes.InvalidPoints] = "Puan 0'dan büyük olmalıdır.",
+        [ErrorCodes.UnsupportedQuestionType] = "Bu soru tipi desteklenmiyor.",
+        [ErrorCodes.InvalidState] = "Bu kayıt başka bir pencerede değişti. Listeyi yenileyin.",
         [ApiException.ConnectionFailed] = "Sunucuya ulaşılamadı. Sunucunun açık olduğunu ve ağ bağlantınızı kontrol edin."
     };
 
