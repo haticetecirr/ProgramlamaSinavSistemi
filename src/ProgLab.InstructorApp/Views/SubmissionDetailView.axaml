@@ -36,10 +36,12 @@
                 <SelectableTextBlock Text="{Binding CorrectAnswer}" TextWrapping="Wrap" />
                 <TextBlock Text="{Binding NoteText, StringFormat='Not: {0}'}" TextWrapping="Wrap" Opacity="0.8"
                            IsVisible="{Binding NoteText, Converter={x:Static ObjectConverters.IsNotNull}}" />
-                <Grid ColumnDefinitions="90,*,Auto" ColumnSpacing="8" Margin="0,6,0,0" IsVisible="{Binding CanOverride}">
-                  <TextBox Text="{Binding ScoreInput}" PlaceholderText="Puan" AutomationProperties.Name="{Binding ScoreName}" />
-                  <TextBox Grid.Column="1" Text="{Binding NoteInput}" PlaceholderText="Not (isteğe bağlı)" MaxLength="300" AutomationProperties.Name="{Binding NoteName}" />
-                  <Button Grid.Column="2" Content="Puanı düzelt" Command="{Binding SaveCommand}" AutomationProperties.Name="{Binding SaveName}" />
+                <Grid ColumnDefinitions="110,*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="2" Margin="0,6,0,0" IsVisible="{Binding CanOverride}">
+                  <TextBlock Text="{Binding ScoreLabel}" Opacity="0.7" />
+                  <TextBlock Grid.Column="1" Text="Not (isteğe bağlı)" Opacity="0.7" />
+                  <TextBox Grid.Row="1" Text="{Binding ScoreInput}" AutomationProperties.Name="{Binding ScoreName}" />
+                  <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding NoteInput}" MaxLength="300" AutomationProperties.Name="{Binding NoteName}" />
+                  <Button Grid.Row="1" Grid.Column="2" Content="Puanı düzelt" Command="{Binding SaveCommand}" AutomationProperties.Name="{Binding SaveName}" />
                 </Grid>
               </StackPanel>
             </Border>
