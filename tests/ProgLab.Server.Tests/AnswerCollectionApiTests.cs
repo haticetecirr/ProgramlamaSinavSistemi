@@ -516,6 +516,7 @@ public sealed class ExamTimerAndLogFileTests : IDisposable
         var threeJoin = await three.JoinExamAsync(exam.Id);
         var question = (await one.GetPaperAsync(exam.Id)).Questions[0].ExamQuestionId;
         await one.SaveAnswerAsync(oneJoin.SubmissionId, question, new(null, "birinci öğrenci"));
+        await two.SaveAnswerAsync(twoJoin.SubmissionId, question, new(null, "  CEVAP. "));
         await three.SaveAnswerAsync(threeJoin.SubmissionId, question, new(null, "üçüncü öğrenci"));
         await three.SubmitAsync(threeJoin.SubmissionId);
 
@@ -544,6 +545,11 @@ public sealed class ExamTimerAndLogFileTests : IDisposable
         Assert.Equal(0, submissions[twoJoin.SubmissionId].SubmitCount);
         Assert.Equal(3, submissions.Count); // Katılmayanlara satır açılmaz.
 
+        // Otomatik teslim edilenler kayıtlı cevaplarıyla puanlanır.
+        Assert.Equal(0m, submissions[oneJoin.SubmissionId].TotalScore);
+        Assert.Equal(5m, submissions[twoJoin.SubmissionId].TotalScore);
+        Assert.NotNull(submissions[twoJoin.SubmissionId].GradedAt);
+
         // Kayıtlı cevap korunur.
         Assert.Equal("birinci öğrenci", (await db.Answers.SingleAsync(a => a.SubmissionId == oneJoin.SubmissionId)).TextAnswer);
 
@@ -566,9 +572,10 @@ public sealed class ExamTimerAndLogFileTests : IDisposable
         var submitLine = Assert.Single(lines, l => l.Contains($"| {ActivityEvents.Submitted} "));
         Assert.Contains(TestAccounts.StudentNumber(3), submitLine);
         Assert.Contains("Demo Öğrenci 3", submitLine);
-        Assert.Contains("1/1 cevap, 1. teslim", submitLine);
+        Assert.Contains("1/1 cevap, 0.00 puan, 1. teslim", submitLine);
         Assert.Matches(@"^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3} [+-]\d{2}:\d{2} \|", submitLine);
         Assert.Equal(2, lines.Count(l => l.Contains(ActivityEvents.AutoSubmitted)));
+        Assert.Contains(lines, l => l.Contains(ActivityEvents.AutoSubmitted) && l.Contains(TestAccounts.StudentNumber(2)) && l.Contains("1/1 cevap, 5.00 puan"));
         Assert.Contains(lines, l => l.Contains(ActivityEvents.ExamEnded) && l.Contains("süre doldu, 2 otomatik teslim"));
     }
 

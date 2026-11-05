@@ -14,4 +14,5 @@ public static class ActivityEvents
     public const string AutoSubmitted = "AUTO_SUBMITTED";
     public const string SaveRejected = "SAVE_REJECTED";
     public const string SubmitRejected = "SUBMIT_REJECTED";
+    public const string ScoreOverridden = "SCORE_OVERRIDDEN";
 }

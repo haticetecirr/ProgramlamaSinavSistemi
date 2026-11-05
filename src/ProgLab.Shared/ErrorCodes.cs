@@ -54,6 +54,7 @@ public static class ErrorCodes
     // Puan düzeltme
     public const string ScoreOutOfRange = "SCORE_OUT_OF_RANGE";
     public const string NotClassicQuestion = "NOT_CLASSIC_QUESTION";
+    public const string AnswerNotFound = "ANSWER_NOT_FOUND";
 
     // Bulunamadı (dokümanın vize özellikleri bölümünde geçer)
     public const string QuestionNotFound = "QUESTION_NOT_FOUND";

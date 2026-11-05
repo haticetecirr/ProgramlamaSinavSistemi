@@ -39,6 +39,12 @@ public sealed record StudentPaperDto(
 public sealed record SaveAnswerRequest(int? SelectedOptionId, string? TextAnswer);
 
 /// <summary>Teslim sonucu. Zaman sunucu saatidir.</summary>
+/// <summary>Elle puan düzeltme isteği.</summary>
+public sealed record OverrideScoreRequest(decimal Score, string? Note);
+
+/// <summary>Düzeltilen puan ve gönderimin yeni toplamı.</summary>
+public sealed record OverrideScoreResponse(decimal Score, decimal TotalScore);
+
 public sealed record SubmitResponse(DateTimeOffset SubmittedAt, int AnsweredCount);
 
 /// <summary>Sunucunun kalan süreyi 30 saniyede bir bildirmesi; istemcideki sayaç bununla düzeltilir.</summary>

@@ -189,6 +189,9 @@ public sealed class ApiClient(HttpClient http, TokenStore? tokens = null)
     public Task<SubmitResponse> SubmitAsync(long submissionId, CancellationToken ct = default) =>
         SendAsync<SubmitResponse>(HttpMethod.Post, $"api/student/submissions/{submissionId}/submit", null, ct);
 
+    public Task<OverrideScoreResponse> OverrideScoreAsync(long answerId, OverrideScoreRequest request, CancellationToken ct = default) =>
+        SendAsync<OverrideScoreResponse>(HttpMethod.Put, $"api/answers/{answerId}/score", request, ct);
+
     public Task<LiveExamDto> GetLiveExamAsync(int examId, CancellationToken ct = default) =>
         SendAsync<LiveExamDto>(HttpMethod.Get, $"api/exams/{examId}/live", null, ct);
 
