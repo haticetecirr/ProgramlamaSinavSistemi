@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.InstructorApp.ViewModels"
+             xmlns:dto="using:ProgLab.Shared.Dtos"
+             x:Class="ProgLab.InstructorApp.Views.ClassesView"
+             x:DataType="vm:ClassesViewModel">
+  <Grid ColumnDefinitions="320,*" RowDefinitions="Auto,Auto,*" Margin="16">
+    <TextBlock Grid.ColumnSpan="2" Classes="title" Text="Şubeler ve Öğrenciler" Margin="0,0,0,8" />
+    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,8">
+      <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <TextBlock Text="{Binding StatusMessage}" TextWrapping="Wrap" IsVisible="{Binding StatusMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    </StackPanel>
+
+    <!-- Sol: şubeler -->
+    <DockPanel Grid.Row="2" Margin="0,0,16,0">
+      <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,8,0,0">
+        <TextBlock Classes="section" Text="Yeni şube" />
+        <TextBlock Text="Şube adı" />
+        <TextBox Text="{Binding NewClassName}" AutomationProperties.Name="Şube adı" />
+        <TextBlock Text="Dönem" />
+        <TextBox Text="{Binding NewClassTerm}" AutomationProperties.Name="Dönem" />
+        <Button Content="Şube ekle" Command="{Binding AddClassCommand}" AutomationProperties.Name="Şube ekle" />
+        <Button Content="Seçili şubeyi sil" Command="{Binding DeleteClassCommand}" AutomationProperties.Name="Seçili şubeyi sil" />
+      </StackPanel>
+      <ListBox ItemsSource="{Binding Classes}" SelectedItem="{Binding SelectedClass}" AutomationProperties.Name="Şubeler">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="dto:ClassDto">
+            <StackPanel>
+              <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+              <TextBlock Opacity="0.7">
+                <Run Text="{Binding Term}" /><Run Text=" · " /><Run Text="{Binding MemberCount}" /><Run Text=" öğrenci" />
+              </TextBlock>
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+
+    <!-- Sağ: seçili şubenin öğrencileri -->
+    <DockPanel Grid.Row="2" Grid.Column="1">
+      <StackPanel DockPanel.Dock="Bottom" Spacing="6" Margin="0,8,0,0">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Content="Şubeden çıkar" Command="{Binding RemoveMemberCommand}" AutomationProperties.Name="Şubeden çıkar" />
+          <Button Content="İlk girişi sıfırla" Command="{Binding ResetFirstLoginCommand}" AutomationProperties.Name="İlk girişi sıfırla" />
+          <Button Content="Aktif / pasif yap" Command="{Binding ToggleActiveCommand}" AutomationProperties.Name="Aktif pasif yap" />
+        </StackPanel>
+        <TextBlock Classes="section" Text="Yeni öğrenci ekle" Margin="0,8,0,0" />
+        <Grid ColumnDefinitions="*,8,*,8,*" RowDefinitions="Auto,Auto">
+          <TextBlock Text="Öğrenci no" />
+          <TextBox Grid.Row="1" Text="{Binding NewStudentNumber}" AutomationProperties.Name="Öğrenci no" />
+          <TextBlock Grid.Column="2" Text="Ad soyad" />
+          <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding NewStudentName}" AutomationProperties.Name="Ad soyad" />
+          <TextBlock Grid.Column="4" Text="E-posta" />
+          <TextBox Grid.Row="1" Grid.Column="4" Text="{Binding NewStudentEmail}" AutomationProperties.Name="E-posta" />
+        </Grid>
+        <Button Content="Öğrenciyi ekle" Command="{Binding AddNewStudentCommand}" AutomationProperties.Name="Öğrenciyi ekle" />
+        <TextBlock Classes="section" Text="Kayıtlı öğrenciyi ekle" Margin="0,8,0,0" />
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ComboBox Width="360" ItemsSource="{Binding OtherStudents}" SelectedItem="{Binding SelectedOtherStudent}" AutomationProperties.Name="Kayıtlı öğrenci">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:StudentRow">
+                <TextBlock Text="{Binding Title}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+          <Button Content="Şubeye ekle" Command="{Binding AddExistingStudentCommand}" AutomationProperties.Name="Şubeye ekle" />
+        </StackPanel>
+      </StackPanel>
+      <ListBox ItemsSource="{Binding Members}" SelectedItem="{Binding SelectedMember}" AutomationProperties.Name="Şube öğrencileri">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:StudentRow">
+            <StackPanel>
+              <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding Status}" Opacity="0.7" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+  </Grid>
+</UserControl>

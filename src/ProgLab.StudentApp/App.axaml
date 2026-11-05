@@ -1,8 +1,24 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.StudentApp.ViewModels"
+             xmlns:views="using:ProgLab.StudentApp.Views"
              x:Class="ProgLab.StudentApp.App"
              RequestedThemeVariant="Default">
+  <!-- Hangi ViewModel için hangi ekranın gösterileceği burada eşlenir. -->
+  <Application.DataTemplates>
+    <DataTemplate DataType="vm:LoginViewModel"><views:LoginView /></DataTemplate>
+    <DataTemplate DataType="vm:FirstLoginViewModel"><views:FirstLoginView /></DataTemplate>
+    <DataTemplate DataType="vm:HomeViewModel"><views:HomeView /></DataTemplate>
+  </Application.DataTemplates>
   <Application.Styles>
     <FluentTheme />
+    <Style Selector="TextBlock.error">
+      <Setter Property="Foreground" Value="#EF5350" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="TextBlock.title">
+      <Setter Property="FontSize" Value="24" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
   </Application.Styles>
 </Application>

@@ -24,6 +24,8 @@
     <ProjectReference Include="..\..\src\ProgLab.Server\ProgLab.Server.csproj" />
     <ProjectReference Include="..\..\src\ProgLab.Shared\ProgLab.Shared.csproj" />
     <ProjectReference Include="..\..\src\ProgLab.Client.Core\ProgLab.Client.Core.csproj" />
+    <ProjectReference Include="..\..\src\ProgLab.InstructorApp\ProgLab.InstructorApp.csproj" />
+    <ProjectReference Include="..\..\src\ProgLab.StudentApp\ProgLab.StudentApp.csproj" />
   </ItemGroup>
 
 </Project>
