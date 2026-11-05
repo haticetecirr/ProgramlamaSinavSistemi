@@ -1,6 +1,6 @@
 # Vize Kabul Durumu
 
-Tasarım dokümanı Bölüm 12.3'teki kabul kriterleri ve Bölüm 21'deki isterler. `v1.0-vize` etiketi tüm kriterler sağlanınca atılır.
+Tasarım dokümanı Bölüm 12.3'teki kabul kriterleri ve Bölüm 21'deki isterler. Doküman `v1.0-vize` etiketini tüm kriterler sağlanınca öngörür; eksik kriterle etiketlenirse bu belge eksikleri gösterir.
 
 ## Kabul kriterleri
 
@@ -8,7 +8,7 @@ Tasarım dokümanı Bölüm 12.3'teki kabul kriterleri ve Bölüm 21'deki isterl
 |---|---|---|---|
 | 1 | 8 vize isteri geçen testlerle doğrulanmış | Sağlandı | Aşağıdaki tablo |
 | 2 | Birim ve entegrasyon testlerinin tamamı geçer | Sağlandı | `dotnet test` |
-| 3 | En az 3 fiziksel bilgisayarla uçtan uca sınav | **Sağlanmadı** | 05.11.2026 denemesinin kayıtlarında eğitmen ve tek öğrenci (`172.20.10.2`) var; ikinci öğrenci, geri dönüş, ikinci cihaz ve sunucu yeniden başlatma görünmüyor |
+| 3 | En az 3 fiziksel bilgisayarla uçtan uca sınav | **Sağlanmadı, atlandı** | Ekip kararıyla tekrar yapılmadı. 05.11.2026 denemesinin kayıtlarında eğitmen ve tek öğrenci (`172.20.10.2`) var; ikinci öğrenci, geri dönüş, ikinci cihaz ve sunucu yeniden başlatma görünmüyor. Bu senaryolar yalnız tek bilgisayarda gerçek pencerelerle ve otomatik testlerle denendi |
 | 4 | Başka bir ekip üyesi README ile sıfırdan kurar | **Yapılmadı** | [Deneme listesi](laboratuvar-deneme-listesi.md), bölüm 3 |
 | 5 | Final modülü kodu yok, yalnız genişleme noktaları | Sağlandı | Kaynak taraması ve `ProjectDependencyTests` |
 

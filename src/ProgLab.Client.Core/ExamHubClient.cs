@@ -15,6 +15,7 @@ public sealed class ExamHubClient : IAsyncDisposable
     private CancellationTokenSource? _startLoop;
     private TaskCompletionSource _ready = NewReadySignal();
     private volatile bool _isReady;
+    private volatile bool _reportedConnected;
 
     public ExamHubClient(Uri baseAddress, TokenStore tokens, Action<HttpConnectionOptions>? configure = null)
     {
@@ -38,6 +39,11 @@ public sealed class ExamHubClient : IAsyncDisposable
         _connection.On(HubEvents.Ready, OnReady);
 
         _connection.Reconnecting += _ => OnConnectionLost(null);
+        _connection.Reconnected += _ =>
+        {
+            ReportIfConnected();
+            return Task.CompletedTask;
+        };
         _connection.Closed += OnConnectionLost;
     }
 
@@ -69,6 +75,7 @@ public sealed class ExamHubClient : IAsyncDisposable
         var ready = _ready = NewReadySignal();
         await _connection.StartAsync(ct);
         await ready.Task.WaitAsync(ReadyTimeout, ct);
+        ReportIfConnected();
     }
 
     /// <summary>Arka planda bağlanana kadar dener; sunucu sonradan açılsa da bağlantı kurulur.</summary>
@@ -118,12 +125,27 @@ public sealed class ExamHubClient : IAsyncDisposable
     {
         _isReady = true;
         _ready.TrySetResult();
+        _reportedConnected = IsConnected;
         StateChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// "Hazır" sinyali, bağlantı kendini "bağlı" saymadan az önce gelebilir. O zaman ekran "bağlantı yok"ta
+    /// takılı kalmasın diye bağlantı tamamlanınca durum bir kez daha bildirilir.
+    /// </summary>
+    private void ReportIfConnected()
+    {
+        if (IsConnected && !_reportedConnected)
+        {
+            _reportedConnected = true;
+            StateChanged?.Invoke();
+        }
     }
 
     private Task OnConnectionLost(Exception? error)
     {
         _isReady = false;
+        _reportedConnected = false;
         if (_connection.State == HubConnectionState.Disconnected)
         {
             // Sunucu bağlantıyı hazır olmadan kapattıysa (ör. pasif hesap) bekleyen StartAsync hemen hata alsın.
