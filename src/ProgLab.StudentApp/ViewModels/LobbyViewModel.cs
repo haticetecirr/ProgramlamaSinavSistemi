@@ -24,9 +24,11 @@ public sealed class LobbyExamRow
 
     public string KindText => Exam.Kind == ExamKind.Exam ? "Sınav" : "Ödev";
 
-    public bool CanJoin => Exam.State == StudentExamState.Open;
+    public bool CanJoin => Exam.CanContinue;
 
-    public string JoinText => Exam.HasStarted ? "Devam et" : "Katıl";
+    public string JoinText => Exam.State == StudentExamState.Submitted
+        ? "Yeniden düzenle"
+        : Exam.HasStarted ? "Devam et" : "Katıl";
 
     /// <summary>Ekran okuyucu ve deneme betikleri için hangi sınava ait olduğunu söyler.</summary>
     public string JoinName => $"{JoinText}: {Title}";

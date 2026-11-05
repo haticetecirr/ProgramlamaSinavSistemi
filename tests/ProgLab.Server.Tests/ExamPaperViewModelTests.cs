@@ -63,6 +63,7 @@ public sealed class CountdownClockTests
     /// </summary>
     [Theory]
     [InlineData("src/ProgLab.Client.Core/CountdownClock.cs")]
+    [InlineData("src/ProgLab.Client.Core/AnswerSaveQueue.cs")]
     [InlineData("src/ProgLab.StudentApp/ViewModels/ExamPaperViewModel.cs")]
     public void TimerCode_NeverReadsSystemClock(string relativePath)
     {

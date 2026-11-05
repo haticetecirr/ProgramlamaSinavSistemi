@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.StudentApp.ViewModels"
+             x:Class="ProgLab.StudentApp.Views.SubmittedView"
+             x:DataType="vm:SubmittedViewModel">
+  <StackPanel Width="520" Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <TextBlock Classes="title" Text="{Binding Title}" TextWrapping="Wrap" HorizontalAlignment="Center" />
+    <TextBlock Classes="section" Text="{Binding Headline}" TextWrapping="Wrap" HorizontalAlignment="Center" />
+    <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" HorizontalAlignment="Center" Opacity="0.8"
+               IsVisible="{Binding Detail, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    <Button Classes="accent" Content="Lobiye dön" HorizontalAlignment="Center"
+            Command="{Binding BackToLobbyCommand}" AutomationProperties.Name="Lobiye dön" />
+  </StackPanel>
+</UserControl>

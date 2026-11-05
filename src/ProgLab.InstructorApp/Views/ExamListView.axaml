@@ -40,6 +40,7 @@
       <StackPanel Orientation="Horizontal" Spacing="8">
         <Button Content="Aç" Command="{Binding OpenExamCommand}" AutomationProperties.Name="Sınavı aç" />
         <Button Content="Sil" IsVisible="{Binding ShowDrafts}" Command="{Binding AskDeleteCommand}" AutomationProperties.Name="Sınavı sil" />
+        <Button Classes="accent" Content="Canlı izle" IsVisible="{Binding ShowPublished}" Command="{Binding OpenLiveCommand}" AutomationProperties.Name="Canlı izle" />
         <Button Content="Bitir" IsVisible="{Binding ShowPublished}" Command="{Binding AskEndCommand}" AutomationProperties.Name="Sınavı bitir" />
         <Button Content="Kopyala" IsVisible="{Binding ShowCompleted}" Command="{Binding CopyCommand}" AutomationProperties.Name="Sınavı kopyala" />
       </StackPanel>

@@ -23,6 +23,7 @@ public enum StudentExamState
 /// <summary>Lobideki sınav kartı. Soru veya cevap anahtarı içermez.</summary>
 /// <param name="RemainingSeconds">Yalnızca açık sınavda; sunucu saatiyle hesaplanır.</param>
 /// <param name="HasStarted">Öğrenci daha önce katıldı mı? Düğme "Katıl" yerine "Devam et" olur.</param>
+/// <param name="CanContinue">Şu an girilebilir mi? Teslim edilmiş ödeve bitişe kadar yeniden girilebilir.</param>
 public sealed record StudentExamSummaryDto(
     int Id,
     string Title,
@@ -31,4 +32,32 @@ public sealed record StudentExamSummaryDto(
     DateTimeOffset StartsAt,
     DateTimeOffset EndsAt,
     int? RemainingSeconds,
-    bool HasStarted);
+    bool HasStarted,
+    bool CanContinue);
+
+public sealed record AnswerProgressEvent(int ExamId, int StudentId, int AnsweredCount);
+
+public sealed record SubmissionReceivedEvent(int ExamId, int StudentId, DateTimeOffset SubmittedAt, decimal? TotalScore);
+
+public sealed record SecondDeviceEvent(int ExamId, int StudentId, string FullName, string? Ip1, string? Ip2);
+
+public sealed record LiveStudentDto(
+    int StudentId,
+    string Username,
+    string FullName,
+    bool IsConnected,
+    string? Ip,
+    int AnsweredCount,
+    SubmissionStatus? Status,
+    DateTimeOffset? SubmittedAt);
+
+/// <summary>Eğitmenin canlı izleme ekranı. Doğru cevap veya puan içermez.</summary>
+public sealed record LiveExamDto(
+    int ExamId,
+    string Title,
+    ExamStatus Status,
+    int RemainingSeconds,
+    DateTimeOffset EndsAt,
+    int TotalQuestions,
+    IReadOnlyList<LiveStudentDto> Students,
+    IReadOnlyList<string> Warnings);

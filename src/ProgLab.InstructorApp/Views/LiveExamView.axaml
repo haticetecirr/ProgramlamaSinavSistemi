@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.InstructorApp.ViewModels"
+             x:Class="ProgLab.InstructorApp.Views.LiveExamView"
+             x:DataType="vm:LiveExamViewModel">
+  <DockPanel Margin="16">
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <StackPanel DockPanel.Dock="Right" Margin="12,0,0,0">
+        <TextBlock Classes="timer" Classes.urgent="{Binding IsUrgent}" Text="{Binding TimeText}" HorizontalAlignment="Right" />
+        <TextBlock Text="kalan süre" Opacity="0.7" HorizontalAlignment="Right" />
+      </StackPanel>
+      <StackPanel Spacing="2">
+        <TextBlock Classes="title" Text="{Binding Title}" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding SummaryText}" Opacity="0.8" />
+      </StackPanel>
+    </DockPanel>
+
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,8,0,0">
+      <Border IsVisible="{Binding IsConfirmingEnd}" Padding="10" BorderBrush="#EF5350" BorderThickness="1" CornerRadius="4">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+            <Button Content="Evet, bitir" Command="{Binding ConfirmEndCommand}" AutomationProperties.Name="Evet, bitir" />
+            <Button Content="Vazgeç" Command="{Binding CancelEndCommand}" AutomationProperties.Name="Bitirmekten vazgeç" />
+          </StackPanel>
+          <TextBlock Text="Sınav şimdi bitirilsin mi? Teslim etmeyenler kayıtlı cevaplarıyla otomatik teslim edilir." VerticalAlignment="Center" TextWrapping="Wrap" />
+        </DockPanel>
+      </Border>
+      <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Listeye dön" Command="{Binding BackCommand}" AutomationProperties.Name="Listeye dön" />
+        <Button Content="Bitir" IsVisible="{Binding IsRunning}" Command="{Binding AskEndCommand}" AutomationProperties.Name="Bitir" />
+      </StackPanel>
+    </StackPanel>
+
+    <Border DockPanel.Dock="Top" IsVisible="{Binding HasWarnings}" Padding="10" Margin="0,0,0,8" BorderBrush="#FFB300" BorderThickness="1" CornerRadius="4">
+      <ItemsControl ItemsSource="{Binding Warnings}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </Border>
+
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="110,*,90,70,190,120" Margin="12,0,12,4" Opacity="0.7">
+      <TextBlock Text="Öğrenci no" />
+      <TextBlock Grid.Column="1" Text="Ad soyad" />
+      <TextBlock Grid.Column="2" Text="Bağlantı" />
+      <TextBlock Grid.Column="3" Text="Cevap" />
+      <TextBlock Grid.Column="4" Text="Durum" />
+      <TextBlock Grid.Column="5" Text="IP" />
+    </Grid>
+
+    <ListBox ItemsSource="{Binding Students}" AutomationProperties.Name="Öğrenciler">
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="vm:LiveStudentRow">
+          <Grid ColumnDefinitions="110,*,90,70,190,120">
+            <TextBlock Text="{Binding Username}" />
+            <TextBlock Grid.Column="1" Text="{Binding FullName}" />
+            <TextBlock Grid.Column="2" Text="{Binding ConnectionText}" />
+            <TextBlock Grid.Column="3" Text="{Binding ProgressText}" />
+            <TextBlock Grid.Column="4" Text="{Binding StatusText}" />
+            <TextBlock Grid.Column="5" Text="{Binding Ip}" />
+          </Grid>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+  </DockPanel>
+</UserControl>

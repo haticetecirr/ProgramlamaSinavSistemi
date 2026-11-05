@@ -54,6 +54,9 @@ public sealed class ExamsController(ExamService exams) : ControllerBase
     public Task<InstructorExamDto> End(int id, CancellationToken ct) =>
         exams.EndAsync(id, User.GetUserId(), HttpContext.Connection.RemoteIpAddress, ct);
 
+    [HttpGet("{id:int}/live")]
+    public Task<LiveExamDto> Live(int id, CancellationToken ct) => exams.GetLiveAsync(id, ct);
+
     [HttpPost("{id:int}/copy")]
     public async Task<ActionResult<InstructorExamDto>> Copy(int id, CancellationToken ct)
     {

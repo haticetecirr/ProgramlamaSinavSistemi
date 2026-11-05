@@ -26,7 +26,7 @@ public sealed record ExamRow(ExamSummaryDto Exam)
 }
 
 /// <summary>Sınav listesi: durum sekmeleri, yeni, düzenle, sil, bitir, kopyala.</summary>
-public sealed partial class ExamListViewModel(ApiClient api, Action<int?> openEditor, string? initialMessage = null) : ObservableObject
+public sealed partial class ExamListViewModel(ApiClient api, Action<int?> openEditor, string? initialMessage = null, Action<int>? openLive = null) : ObservableObject
 {
     private int _loadVersion;
 
@@ -92,6 +92,19 @@ public sealed partial class ExamListViewModel(ApiClient api, Action<int?> openEd
         if (SelectedExam is { } row)
         {
             openEditor(row.Exam.Id);
+        }
+        else
+        {
+            ErrorMessage = "Önce listeden bir sınav seçin.";
+        }
+    }
+
+    [RelayCommand]
+    private void OpenLive()
+    {
+        if (SelectedExam is { } row)
+        {
+            openLive?.Invoke(row.Exam.Id);
         }
         else
         {

@@ -9,6 +9,8 @@ namespace ProgLab.InstructorApp.ViewModels;
 public sealed partial class MainWindowViewModel : ObservableObject
 {
     private readonly ApiClient _api;
+    private readonly ExamHubClient? _hub;
+    private readonly Action<Action> _ui;
 
     [ObservableProperty]
     private string _title = "Prog. Lab. Sınav Platformu — Eğitmen";
@@ -27,9 +29,10 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public MainWindowViewModel(ApiClient api, ExamHubClient? hub = null, Func<string?>? readFingerprint = null, Action<Action>? ui = null)
     {
         _api = api;
-        var dispatch = ui ?? (action => action());
-        Live = new LiveStatusViewModel(api, hub, readFingerprint, dispatch);
-        _api.SessionExpired += () => dispatch(() => ShowLogin("Oturum süreniz doldu. Lütfen yeniden giriş yapın."));
+        _hub = hub;
+        _ui = ui ?? (action => action());
+        Live = new LiveStatusViewModel(api, hub, readFingerprint, _ui);
+        _api.SessionExpired += () => _ui(() => ShowLogin("Oturum süreniz doldu. Lütfen yeniden giriş yapın."));
         _currentPage = new LoginViewModel(_api, OnLoggedIn);
     }
 
@@ -47,6 +50,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void ShowDashboard()
     {
+        LeaveCurrentPage();
         CanNavigate = true;
         var page = new DashboardViewModel(_api, Live);
         CurrentPage = page;
@@ -56,6 +60,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void ShowClasses()
     {
+        LeaveCurrentPage();
         var page = new ClassesViewModel(_api);
         CurrentPage = page;
         _ = page.LoadCommand.ExecuteAsync(null);
@@ -66,6 +71,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private void OpenQuestionBank(string? message)
     {
+        LeaveCurrentPage();
         var page = new QuestionBankViewModel(_api, OpenQuestionEditor, message);
         CurrentPage = page;
         _ = page.LoadCommand.ExecuteAsync(null);
@@ -83,7 +89,8 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private void OpenExamList(string? message)
     {
-        var page = new ExamListViewModel(_api, OpenExamEditor, message);
+        LeaveCurrentPage();
+        var page = new ExamListViewModel(_api, OpenExamEditor, message, OpenLiveExam);
         CurrentPage = page;
         _ = page.LoadCommand.ExecuteAsync(null);
     }
@@ -95,8 +102,26 @@ public sealed partial class MainWindowViewModel : ObservableObject
         _ = page.LoadCommand.ExecuteAsync(null);
     }
 
+    private void OpenLiveExam(int examId)
+    {
+        LeaveCurrentPage();
+        var page = new LiveExamViewModel(_api, _hub, examId, _ui, () => OpenExamList(null));
+        CurrentPage = page;
+        page.Start();
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void LeaveCurrentPage()
+    {
+        if (CurrentPage is LiveExamViewModel live)
+        {
+            live.Stop();
+        }
+    }
+
     private void ShowLogin(string? message = null)
     {
+        LeaveCurrentPage();
         Live.Stop();
         UserName = null;
         CanNavigate = false;

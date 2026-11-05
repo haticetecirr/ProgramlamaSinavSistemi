@@ -15,6 +15,7 @@
     <DataTemplate DataType="vm:CategoryDialogViewModel"><views:CategoryDialog /></DataTemplate>
     <DataTemplate DataType="vm:ExamListViewModel"><views:ExamListView /></DataTemplate>
     <DataTemplate DataType="vm:ExamEditorViewModel"><views:ExamEditorView /></DataTemplate>
+    <DataTemplate DataType="vm:LiveExamViewModel"><views:LiveExamView /></DataTemplate>
   </Application.DataTemplates>
   <Application.Styles>
     <FluentTheme />
@@ -25,6 +26,13 @@
     <Style Selector="TextBlock.title">
       <Setter Property="FontSize" Value="24" />
       <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.timer">
+      <Setter Property="FontSize" Value="28" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.timer.urgent">
+      <Setter Property="Foreground" Value="#EF5350" />
     </Style>
     <Style Selector="TextBlock.section">
       <Setter Property="FontSize" Value="16" />

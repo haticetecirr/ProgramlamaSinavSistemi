@@ -35,6 +35,8 @@ public sealed class StudentExamService(AppDbContext db)
             .Select(e =>
             {
                 var state = ExamRules.StudentState(e.Status, e.StartsAt, e.EndsAt, e.SubmissionStatus, now);
+                var isWindowOpen = e.Status == ExamStatus.Published && e.StartsAt <= now && now < e.EndsAt;
+                var canContinue = isWindowOpen && (state == StudentExamState.Open || e.Kind == ExamKind.Assignment);
                 return new StudentExamSummaryDto(
                     e.Id,
                     e.Title,
@@ -42,8 +44,9 @@ public sealed class StudentExamService(AppDbContext db)
                     state,
                     e.StartsAt,
                     e.EndsAt,
-                    state == StudentExamState.Open ? ExamRules.RemainingSeconds(e.EndsAt, now) : null,
-                    e.SubmissionStatus is not null);
+                    canContinue ? ExamRules.RemainingSeconds(e.EndsAt, now) : null,
+                    e.SubmissionStatus is not null,
+                    canContinue);
             })
             .OrderBy(e => e.State)
             .ThenBy(e => e.State == StudentExamState.Completed ? -e.EndsAt.ToUnixTimeSeconds() : e.EndsAt.ToUnixTimeSeconds())

@@ -32,6 +32,9 @@ public sealed class ExamHubClient : IAsyncDisposable
         _connection.On<StudentConnectionDto>(HubEvents.StudentConnected, e => StudentConnected?.Invoke(e));
         _connection.On<StudentConnectionDto>(HubEvents.StudentDisconnected, e => StudentDisconnected?.Invoke(e));
         _connection.On<TimeSyncEvent>(HubEvents.TimeSync, e => TimeSync?.Invoke(e));
+        _connection.On<AnswerProgressEvent>(HubEvents.AnswerProgress, e => AnswerProgress?.Invoke(e));
+        _connection.On<SubmissionReceivedEvent>(HubEvents.SubmissionReceived, e => SubmissionReceived?.Invoke(e));
+        _connection.On<SecondDeviceEvent>(HubEvents.SecondDeviceWarning, e => SecondDeviceWarning?.Invoke(e));
         _connection.On(HubEvents.Ready, OnReady);
 
         _connection.Reconnecting += _ => OnConnectionLost(null);
@@ -43,6 +46,12 @@ public sealed class ExamHubClient : IAsyncDisposable
     public event Action<ExamEndedEvent>? ExamEnded;
 
     public event Action<TimeSyncEvent>? TimeSync;
+
+    public event Action<AnswerProgressEvent>? AnswerProgress;
+
+    public event Action<SubmissionReceivedEvent>? SubmissionReceived;
+
+    public event Action<SecondDeviceEvent>? SecondDeviceWarning;
 
     public event Action<StudentConnectionDto>? StudentConnected;
 

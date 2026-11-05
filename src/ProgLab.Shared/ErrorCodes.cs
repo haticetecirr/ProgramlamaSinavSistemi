@@ -82,4 +82,7 @@ public static class ErrorCodes
     // Dokümanın hata tablosunda karşılığı olmayan durumlar için Aşama 5'te eklendi
     public const string DuplicateOrderNo = "DUPLICATE_ORDER_NO";
     public const string ExamHasDeletedQuestion = "EXAM_HAS_DELETED_QUESTION";
+
+    // Dokümanın hata tablosunda karşılığı olmayan durum için Aşama 8'de eklendi
+    public const string SubmissionNotFound = "SUBMISSION_NOT_FOUND";
 }

@@ -25,14 +25,17 @@ public abstract partial class PaperQuestionViewModel(StudentQuestionDto question
 
     public abstract bool IsAnswered { get; }
 
-    protected void NotifyAnswerChanged(Action? onChanged)
+    /// <summary>Sunucuya gidecek cevap.</summary>
+    public abstract SaveAnswerRequest ToSaveRequest();
+
+    protected void NotifyAnswerChanged(Action<PaperQuestionViewModel>? onChanged)
     {
         OnPropertyChanged(nameof(IsAnswered));
         OnPropertyChanged(nameof(StateText));
-        onChanged?.Invoke();
+        onChanged?.Invoke(this);
     }
 
-    public static PaperQuestionViewModel Create(StudentQuestionDto question, int number, StudentAnswerDto? saved, Action? onChanged) => question.Type switch
+    public static PaperQuestionViewModel Create(StudentQuestionDto question, int number, StudentAnswerDto? saved, Action<PaperQuestionViewModel>? onChanged) => question.Type switch
     {
         QuestionType.MultipleChoice => new MultipleChoiceQuestionViewModel(question, number, saved, onChanged),
         QuestionType.Classic => new ClassicQuestionViewModel(question, number, saved, onChanged),
@@ -61,10 +64,10 @@ public sealed partial class PaperOptionViewModel(StudentOptionDto option, Action
 
 public sealed partial class MultipleChoiceQuestionViewModel : PaperQuestionViewModel
 {
-    private readonly Action? _onChanged;
+    private readonly Action<PaperQuestionViewModel>? _onChanged;
     private bool _isApplying;
 
-    public MultipleChoiceQuestionViewModel(StudentQuestionDto question, int number, StudentAnswerDto? saved, Action? onChanged)
+    public MultipleChoiceQuestionViewModel(StudentQuestionDto question, int number, StudentAnswerDto? saved, Action<PaperQuestionViewModel>? onChanged)
         : base(question, number)
     {
         _onChanged = onChanged;
@@ -84,6 +87,8 @@ public sealed partial class MultipleChoiceQuestionViewModel : PaperQuestionViewM
     public int? SelectedOptionId => Options.FirstOrDefault(o => o.IsSelected)?.Id;
 
     public override bool IsAnswered => SelectedOptionId is not null;
+
+    public override SaveAnswerRequest ToSaveRequest() => new(SelectedOptionId, null);
 
     /// <summary>Radyo düğmesi kendi başına boşaltılamaz; işareti kaldırmak için bu komut kullanılır.</summary>
     [RelayCommand]
@@ -118,7 +123,7 @@ public sealed partial class MultipleChoiceQuestionViewModel : PaperQuestionViewM
     }
 }
 
-public sealed partial class ClassicQuestionViewModel(StudentQuestionDto question, int number, StudentAnswerDto? saved, Action? onChanged)
+public sealed partial class ClassicQuestionViewModel(StudentQuestionDto question, int number, StudentAnswerDto? saved, Action<PaperQuestionViewModel>? onChanged)
     : PaperQuestionViewModel(question, number)
 {
     public const int MaxLength = 2000;
@@ -127,6 +132,8 @@ public sealed partial class ClassicQuestionViewModel(StudentQuestionDto question
     private string _textAnswer = saved?.TextAnswer ?? "";
 
     public override bool IsAnswered => !string.IsNullOrWhiteSpace(TextAnswer);
+
+    public override SaveAnswerRequest ToSaveRequest() => new(null, TextAnswer);
 
     partial void OnTextAnswerChanged(string value) => NotifyAnswerChanged(onChanged);
 }
