@@ -37,14 +37,5 @@ public sealed class ProjectDependencyTests
         Assert.False(Directory.Exists(Path.Combine(root, "tests", "ProgLab.Runner.Tests")));
     }
 
-    private static string FindSolutionRoot()
-    {
-        var directory = new DirectoryInfo(AppContext.BaseDirectory);
-        while (directory is not null && !File.Exists(Path.Combine(directory.FullName, "ProgLab.sln")))
-        {
-            directory = directory.Parent;
-        }
-
-        return directory?.FullName ?? throw new DirectoryNotFoundException("ProgLab.sln bulunamadı.");
-    }
+    private static string FindSolutionRoot() => Infrastructure.SolutionPaths.Root;
 }
