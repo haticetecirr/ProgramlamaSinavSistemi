@@ -262,6 +262,64 @@ public sealed class SubmitAndLiveViewModelTests(MigratedDatabaseFixture fixture)
         main.LogoutCommand.Execute(null);
     }
 
+    /// <summary>Laboratuvar öncesi bulunan boşluk: Çıkış düğmesi bekleyen cevabı atıyordu.</summary>
+    [Fact]
+    public async Task Logout_FromPaper_SendsPendingAnswerFirst()
+    {
+        var examId = await PublishedAsync("Çıkışta kayıt");
+        var main = new ProgLab.StudentApp.ViewModels.MainWindowViewModel(new ApiClient(fixture.Server.CreateClient()));
+        var first = await FirstLoginAsync(main, 9);
+        var lobby = Assert.IsType<LobbyViewModel>(main.CurrentPage);
+        await lobby.RefreshCommand.ExecuteAsync(null);
+        await lobby.Exams.Single(e => e.Exam.Id == examId).JoinCommand.ExecuteAsync(null);
+        var paper = Assert.IsType<ExamPaperViewModel>(main.CurrentPage);
+        await paper.LoadCommand.ExecutionTask!;
+
+        Assert.IsType<ClassicQuestionViewModel>(paper.Questions[1]).TextAnswer = "çıkmadan hemen önce";
+        Assert.True(await main.CanCloseAsync());
+        await main.LogoutCommand.ExecuteAsync(null);
+
+        Assert.IsType<ProgLab.StudentApp.ViewModels.LoginViewModel>(main.CurrentPage);
+        await using var db = fixture.CreateDbContext();
+        var answer = await db.Answers.SingleAsync(a => a.Submission!.ExamId == examId);
+        Assert.Equal("çıkmadan hemen önce", answer.TextAnswer);
+        _ = first;
+    }
+
+    [Fact]
+    public async Task CanLeave_WhenOffline_WarnsOnce_ThenAllows()
+    {
+        var examId = await PublishedAsync("Kopukken çıkış");
+        var login = await new ApiClient(fixture.Server.CreateClient()).FirstLoginAsync(TestAccounts.StudentNumber(10), TestAccounts.StudentEmail(10), TestAccounts.StudentPassword);
+        var switchable = new SwitchableHandler(fixture.Server.Server.CreateHandler());
+        var tokens = new TokenStore();
+        tokens.Set(login.Token, login.ExpiresAt);
+        var api = new ApiClient(new HttpClient(switchable) { BaseAddress = new Uri("http://localhost/") }, tokens);
+        await api.JoinExamAsync(examId);
+        var paper = new ExamPaperViewModel(api, null, examId, a => a(), () => { }, null, null, TimeSpan.FromMinutes(5), TimeSpan.FromMilliseconds(50));
+        await paper.LoadCommand.ExecuteAsync(null);
+
+        switchable.IsOffline = true;
+        Assert.IsType<ClassicQuestionViewModel>(paper.Questions[1]).TextAnswer = "gönderilemedi";
+
+        Assert.False(await paper.CanLeaveAsync());
+        Assert.Contains("kaybolur", paper.ErrorMessage);
+        Assert.True(await paper.CanLeaveAsync());
+        paper.Stop();
+    }
+
+    private static async Task<int> FirstLoginAsync(ProgLab.StudentApp.ViewModels.MainWindowViewModel main, int student)
+    {
+        var login = Assert.IsType<ProgLab.StudentApp.ViewModels.LoginViewModel>(main.CurrentPage);
+        login.GoToFirstLoginCommand.Execute(null);
+        var first = Assert.IsType<FirstLoginViewModel>(main.CurrentPage);
+        first.StudentNumber = TestAccounts.StudentNumber(student);
+        first.Email = TestAccounts.StudentEmail(student);
+        first.NewPassword = first.NewPasswordRepeat = TestAccounts.StudentPassword;
+        await first.SubmitCommand.ExecuteAsync(null);
+        return student;
+    }
+
     [Fact]
     public async Task LiveScreen_ShowsStudents_UpdatesLive_AndEnds()
     {

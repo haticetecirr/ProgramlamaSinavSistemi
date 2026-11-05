@@ -27,6 +27,8 @@ public sealed partial class QuestionResultRow(QuestionResultDto question, Func<Q
 
     public string ScoreName { get; } = $"Puan: Soru {question.OrderNo}";
 
+    public string ScoreLabel { get; } = $"Puan (0–{question.Points:0.##})";
+
     public string NoteName { get; } = $"Not: Soru {question.OrderNo}";
 
     [ObservableProperty]

@@ -48,11 +48,18 @@ public sealed partial class MainWindowViewModel : ObservableObject
     public bool IsLoggedIn => UserName is not null;
 
     [RelayCommand]
-    private void Logout()
+    private async Task LogoutAsync()
     {
-        _api?.Logout();
-        ShowLogin();
+        if (await CanCloseAsync())
+        {
+            _api?.Logout();
+            ShowLogin();
+        }
     }
+
+    /// <summary>Sınav ekranındaysa bekleyen cevaplar gönderilmeden çıkılmaz.</summary>
+    public Task<bool> CanCloseAsync() =>
+        CurrentPage is ExamPaperViewModel paper ? paper.CanLeaveAsync() : Task.FromResult(true);
 
     private void UseServer(ApiClient api, ExamHubClient? hub)
     {

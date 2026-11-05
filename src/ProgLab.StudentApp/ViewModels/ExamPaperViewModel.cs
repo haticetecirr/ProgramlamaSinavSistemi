@@ -21,6 +21,8 @@ public sealed partial class ExamPaperViewModel : ObservableObject
     /// <summary>Süre bitmek üzereyken bekletme yapılmaz: sunucu bitişten sonra kabul etmez.</summary>
     private const int FlushBeforeEndSeconds = 5;
 
+    private static readonly TimeSpan LeaveFlushTimeout = TimeSpan.FromSeconds(3);
+
     private readonly ApiClient _api;
     private readonly ExamHubClient? _hub;
     private readonly int _examId;
@@ -235,14 +237,41 @@ public sealed partial class ExamPaperViewModel : ObservableObject
     [RelayCommand]
     private async Task BackToLobbyAsync()
     {
-        if (_queue is not null && !await _queue.FlushAsync() && !_leaveWarned)
+        if (await CanLeaveAsync())
         {
-            _leaveWarned = true;
-            ErrorMessage = "Bağlantı yok: gönderilemeyen cevaplar var. Çıkarsanız kaybolur; yine de çıkmak için tekrar basın.";
-            return;
+            _onBack();
+        }
+    }
+
+    /// <summary>
+    /// Ekrandan çıkmadan önce bekleyen cevapları gönderir (lobiye dönüş, Çıkış, pencereyi kapatma).
+    /// Gönderilemezse bir kez uyarır; ikinci denemede öğrenci bilerek çıkabilir.
+    /// </summary>
+    public async Task<bool> CanLeaveAsync()
+    {
+        if (_queue is null || _leaveWarned)
+        {
+            return true;
         }
 
-        _onBack();
+        bool sent;
+        try
+        {
+            sent = await _queue.FlushAsync().WaitAsync(LeaveFlushTimeout);
+        }
+        catch (TimeoutException)
+        {
+            sent = false;
+        }
+
+        if (sent)
+        {
+            return true;
+        }
+
+        _leaveWarned = true;
+        ErrorMessage = "Bağlantı yok: gönderilemeyen cevaplar var. Çıkarsanız kaybolur; yine de çıkmak için tekrar deneyin.";
+        return false;
     }
 
     /// <summary>Ekran açıldığında: saniyelik sayaç ve bildirimler.</summary>
