@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -5,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using ProgLab.Server.Background;
 using ProgLab.Server.Data;
 using ProgLab.Server.Data.Seed;
 using ProgLab.Server.Errors;
+using ProgLab.Server.Hubs;
 using ProgLab.Server.Security;
 using ProgLab.Server.Services;
 using ProgLab.Shared;
@@ -43,6 +46,21 @@ builder.Services.AddScoped<ClassService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<ExamService>();
+builder.Services.AddScoped<ExamNotifier>();
+builder.Services.AddScoped<StudentExamService>();
+
+// Yerel ağ: HTTPS, sunucu duyurusu ve gerçek zamanlı bildirimler.
+builder.Services.Configure<DiscoveryOptions>(builder.Configuration.GetSection(DiscoveryOptions.Section));
+builder.Services.AddSingleton<CertificateProvider>();
+builder.Services.AddSingleton<ConnectionTracker>();
+builder.Services.AddHostedService<DiscoveryBroadcaster>();
+builder.Services.AddSignalR();
+
+// 0.0.0.0: aynı ağdaki öğrenci bilgisayarları bağlanabilsin. Testlerdeki bellek içi sunucu bu ayarı kullanmaz.
+var serverPort = builder.Configuration.GetValue("Server:Port", 5000);
+builder.WebHost.ConfigureKestrel(kestrel =>
+    kestrel.Listen(IPAddress.Any, serverPort, listen =>
+        listen.UseHttps(kestrel.ApplicationServices.GetRequiredService<CertificateProvider>().Certificate)));
 
 // JWT doğrulama. Hatalı veya süresi dolmuş token da diğer hatalarla aynı biçimde cevaplanır.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
@@ -62,6 +80,17 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
         };
         options.Events = new JwtBearerEvents
         {
+            // Tarayıcı olmayan SignalR taşıyıcıları (WebSocket) token'ı sorgu dizesinde getirir.
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Query["access_token"];
+                if (!string.IsNullOrEmpty(token) && context.HttpContext.Request.Path.StartsWithSegments(HubEvents.HubPath))
+                {
+                    context.Token = token;
+                }
+
+                return Task.CompletedTask;
+            },
             OnChallenge = context =>
             {
                 context.HandleResponse();
@@ -123,6 +152,7 @@ app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<ExamHub>(HubEvents.HubPath);
 
 app.Run();
 

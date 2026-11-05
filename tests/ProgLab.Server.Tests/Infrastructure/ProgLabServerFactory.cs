@@ -18,5 +18,6 @@ public sealed class ProgLabServerFactory(string connectionString, int authPermit
         builder.UseSetting("Seed:InstructorTemporaryPassword", InstructorTemporaryPassword);
         builder.UseSetting("Jwt:SigningKey", SigningKey);
         builder.UseSetting("RateLimiting:AuthPermitPerMinute", authPermitPerMinute.ToString());
+        builder.UseSetting("Discovery:Enabled", "false"); // Testler ağa duyuru yapmaz.
     }
 }

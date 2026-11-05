@@ -485,3 +485,4 @@ $RECYCLE.BIN/
 appsettings.Local.json
 logs/
 *.pfx
+certs/

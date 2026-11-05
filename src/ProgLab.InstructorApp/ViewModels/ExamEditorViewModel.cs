@@ -151,7 +151,8 @@ public sealed partial class ExamEditorViewModel : ObservableObject
         }
         else
         {
-            SelectedClass = Classes.FirstOrDefault();
+            // Birden çok şube varken ön seçim yapılmaz: sınav fark edilmeden yanlış şubeye yayınlanmasın.
+            SelectedClass = Classes.Count == 1 ? Classes[0] : null;
         }
     });
 

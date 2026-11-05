@@ -1,0 +1,39 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.StudentApp.ViewModels"
+             x:Class="ProgLab.StudentApp.Views.LobbyView"
+             x:DataType="vm:LobbyViewModel">
+  <DockPanel Margin="16">
+    <StackPanel DockPanel.Dock="Top" Spacing="6" Margin="0,0,0,8">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Content="Yenile" Command="{Binding RefreshCommand}" AutomationProperties.Name="Yenile" />
+        <TextBlock Classes="title" Text="Sınavlarım" />
+      </DockPanel>
+      <TextBlock Text="{Binding Greeting}" />
+      <TextBlock Text="{Binding ConnectionText}" Opacity="0.7" />
+      <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+    </StackPanel>
+
+    <TextBlock DockPanel.Dock="Top" Text="Şu anda size açılmış bir sınav yok. Eğitmen yayınladığında burada kendiliğinden görünecek."
+               IsVisible="{Binding IsEmpty}" TextWrapping="Wrap" Margin="0,8" />
+
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Exams}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:LobbyExamRow">
+            <Border Margin="0,0,0,8" Padding="12" BorderBrush="#40808080" BorderThickness="1" CornerRadius="6">
+              <DockPanel>
+                <TextBlock DockPanel.Dock="Right" Text="{Binding StateText}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="12,0,0,0" />
+                <StackPanel Spacing="2">
+                  <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding KindText}" Opacity="0.7" />
+                  <TextBlock Text="{Binding TimeText}" Opacity="0.7" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

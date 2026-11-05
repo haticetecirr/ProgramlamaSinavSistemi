@@ -20,16 +20,20 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsLoggedIn))]
     private string? _userName;
 
-    /// <summary>Parola değiştirme zorunluluğu varken menü gizlenir.</summary>
+    /// <summary>Parola değiştirme zorunluluğu varken menü ve durum çubuğu gizlenir.</summary>
     [ObservableProperty]
     private bool _canNavigate;
 
-    public MainWindowViewModel(ApiClient api)
+    public MainWindowViewModel(ApiClient api, ExamHubClient? hub = null, Func<string?>? readFingerprint = null, Action<Action>? ui = null)
     {
         _api = api;
-        _api.SessionExpired += () => ShowLogin("Oturum süreniz doldu. Lütfen yeniden giriş yapın.");
+        var dispatch = ui ?? (action => action());
+        Live = new LiveStatusViewModel(api, hub, readFingerprint, dispatch);
+        _api.SessionExpired += () => dispatch(() => ShowLogin("Oturum süreniz doldu. Lütfen yeniden giriş yapın."));
         _currentPage = new LoginViewModel(_api, OnLoggedIn);
     }
+
+    public LiveStatusViewModel Live { get; }
 
     public bool IsLoggedIn => UserName is not null;
 
@@ -41,9 +45,17 @@ public sealed partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void ShowClasses()
+    private void ShowDashboard()
     {
         CanNavigate = true;
+        var page = new DashboardViewModel(_api, Live);
+        CurrentPage = page;
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
+    [RelayCommand]
+    private void ShowClasses()
+    {
         var page = new ClassesViewModel(_api);
         CurrentPage = page;
         _ = page.LoadCommand.ExecuteAsync(null);
@@ -85,6 +97,7 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private void ShowLogin(string? message = null)
     {
+        Live.Stop();
         UserName = null;
         CanNavigate = false;
         CurrentPage = new LoginViewModel(_api, OnLoggedIn, message);
@@ -95,11 +108,11 @@ public sealed partial class MainWindowViewModel : ObservableObject
         UserName = response.FullName;
         if (response.MustChangePassword)
         {
-            CurrentPage = new ChangePasswordViewModel(_api, ShowClasses);
+            CurrentPage = new ChangePasswordViewModel(_api, ShowDashboard);
         }
         else
         {
-            ShowClasses();
+            ShowDashboard();
         }
     }
 }

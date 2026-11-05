@@ -86,6 +86,29 @@ public static class ExamRules
     public static (DateTimeOffset StartsAt, DateTimeOffset EndsAt) EarlyEndWindow(DateTimeOffset startsAt, DateTimeOffset now) =>
         (startsAt < now ? startsAt : now.AddSeconds(-1), now);
 
+    /// <summary>
+    /// Lobideki durum yalnızca sunucu saatinden türetilir. Süresi geçmiş ama henüz tamamlanmamış sınav
+    /// da öğrenciye "Tamamlandı" görünür; teslim etmiş öğrenci her zaman "Teslim edildi" görür.
+    /// </summary>
+    public static StudentExamState StudentState(ExamStatus status, DateTimeOffset startsAt, DateTimeOffset endsAt, SubmissionStatus? submission, DateTimeOffset now)
+    {
+        if (submission is SubmissionStatus.Submitted or SubmissionStatus.AutoSubmitted)
+        {
+            return StudentExamState.Submitted;
+        }
+
+        if (status == ExamStatus.Completed || now >= endsAt)
+        {
+            return StudentExamState.Completed;
+        }
+
+        return now < startsAt ? StudentExamState.Upcoming : StudentExamState.Open;
+    }
+
+    /// <summary>Kalan süre yukarı yuvarlanır: son saniyede bile 0 görünmez, süre bitince 0 olur.</summary>
+    public static int RemainingSeconds(DateTimeOffset endsAt, DateTimeOffset now) =>
+        Math.Max(0, (int)Math.Ceiling((endsAt - now).TotalSeconds));
+
     /// <summary>Kopya başlığı; sütun sınırını aşarsa asıl başlık kısaltılır.</summary>
     public static string CopyTitle(string title)
     {

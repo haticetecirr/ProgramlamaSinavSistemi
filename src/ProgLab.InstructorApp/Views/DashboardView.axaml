@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.InstructorApp.ViewModels"
+             xmlns:dto="using:ProgLab.Shared.Dtos"
+             x:Class="ProgLab.InstructorApp.Views.DashboardView"
+             x:DataType="vm:DashboardViewModel">
+  <DockPanel Margin="16">
+    <StackPanel DockPanel.Dock="Top" Spacing="6" Margin="0,0,0,12">
+      <TextBlock Classes="title" Text="Ana Sayfa" />
+      <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <TextBlock Classes="section" Text="Öğrenciler bu adrese bağlanır" Margin="0,6,0,0" />
+      <TextBlock Text="{Binding Live.AddressText}" FontSize="16" TextWrapping="Wrap" />
+      <TextBlock Text="Öğrenci uygulaması sunucuyu kendiliğinden bulur; bulamazsa bu adres elle yazılır." Opacity="0.7" TextWrapping="Wrap" />
+      <TextBlock Text="Sertifika parmak izi (öğrenci karşılaştırabilir):" Opacity="0.7" Margin="0,6,0,0" />
+      <SelectableTextBlock Text="{Binding Live.Fingerprint}" TextWrapping="Wrap" />
+    </StackPanel>
+
+    <Grid ColumnDefinitions="*,16,*">
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="section" Margin="0,0,0,6">
+          <Run Text="Bağlı öğrenciler (" /><Run Text="{Binding Live.ConnectedCount}" /><Run Text=")" />
+        </TextBlock>
+        <ListBox ItemsSource="{Binding Live.Students}" AutomationProperties.Name="Bağlı öğrenciler">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="dto:StudentConnectionDto">
+              <StackPanel>
+                <TextBlock Text="{Binding FullName}" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Ip}" Opacity="0.7" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+      <DockPanel Grid.Column="2">
+        <TextBlock DockPanel.Dock="Top" Classes="section" Text="Yayındaki sınavlar" Margin="0,0,0,6" />
+        <ListBox ItemsSource="{Binding ActiveExams}" AutomationProperties.Name="Yayındaki sınavlar">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:ExamRow">
+              <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Details}" Opacity="0.7" TextWrapping="Wrap" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+    </Grid>
+  </DockPanel>
+</UserControl>

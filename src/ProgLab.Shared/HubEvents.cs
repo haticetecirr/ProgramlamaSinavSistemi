@@ -16,4 +16,10 @@ public static class HubEvents
     public const string AnswerProgress = nameof(AnswerProgress);
     public const string SubmissionReceived = nameof(SubmissionReceived);
     public const string SecondDeviceWarning = nameof(SecondDeviceWarning);
+
+    /// <summary>
+    /// Dokümanda yok, Aşama 6'da eklendi. Bağlantı kurulduğu an gruplara ekleme henüz bitmemiş olabilir;
+    /// sunucu bunu ekleme bitince gönderir. İstemci listesini bundan sonra tazeler, böylece arada yayınlanan sınav kaçmaz.
+    /// </summary>
+    public const string Ready = nameof(Ready);
 }

@@ -42,7 +42,7 @@
           <TextBlock Text="Açıklama (isteğe bağlı)" />
           <TextBox Text="{Binding Description}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="60" AutomationProperties.Name="Sınav açıklaması" />
           <TextBlock Text="Hedef şube" />
-          <ComboBox HorizontalAlignment="Stretch" ItemsSource="{Binding Classes}" SelectedItem="{Binding SelectedClass}" AutomationProperties.Name="Hedef şube">
+          <ComboBox HorizontalAlignment="Stretch" PlaceholderText="Şube seçin" ItemsSource="{Binding Classes}" SelectedItem="{Binding SelectedClass}" AutomationProperties.Name="Hedef şube">
             <ComboBox.ItemTemplate>
               <DataTemplate x:DataType="dto:ClassDto">
                 <TextBlock Text="{Binding Name}" />
