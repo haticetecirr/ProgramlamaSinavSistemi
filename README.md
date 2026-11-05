@@ -2,7 +2,7 @@
 
 Yerel ağda çalışan masaüstü sınav platformu. C#, .NET 10, Avalonia UI, ASP.NET Core ve PostgreSQL ile geliştirilir.
 
-Şu anki durum: **Vize — Aşama 9 (otomatik puanlama)**. Teslimde ve otomatik teslimde puan hesaplanır; elle düzeltme API'den yapılır. Sonuç ve log ekranları Aşama 10'da eklenir.
+Şu anki durum: **Vize — Aşama 10 (sonuç ve log ekranları)**. Eğitmen sonuçları, cevapları ve logları panelde görür, klasik puanı elle düzeltir. Çoklu bilgisayar denemesi Aşama 11'de yapılır.
 
 ## Projeler
 

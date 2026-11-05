@@ -38,7 +38,7 @@ public sealed partial class LiveStudentRow(LiveStudentDto student, int totalQues
 }
 
 /// <summary>Sınav sürerken eğitmen ekranı: kalan süre, öğrenci tablosu, uyarılar, bitirme.</summary>
-public sealed partial class LiveExamViewModel(ApiClient api, ExamHubClient? hub, int examId, Action<Action> ui, Action onBack, CountdownClock? clock = null) : ObservableObject
+public sealed partial class LiveExamViewModel(ApiClient api, ExamHubClient? hub, int examId, Action<Action> ui, Action onBack, Action<int>? openResults = null, CountdownClock? clock = null) : ObservableObject
 {
     private const int UrgentSeconds = 5 * 60;
 
@@ -185,6 +185,9 @@ public sealed partial class LiveExamViewModel(ApiClient api, ExamHubClient? hub,
 
     [RelayCommand]
     private void Back() => onBack();
+
+    [RelayCommand]
+    private void OpenResults() => openResults?.Invoke(examId);
 
     private void RequestRefresh() => ui(() => LastRefresh = LoadCommand.ExecuteAsync(null));
 
