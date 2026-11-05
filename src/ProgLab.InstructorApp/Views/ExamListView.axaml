@@ -43,6 +43,8 @@
         <Button Classes="accent" Content="Canlı izle" IsVisible="{Binding ShowPublished}" Command="{Binding OpenLiveCommand}" AutomationProperties.Name="Canlı izle" />
         <Button Content="Bitir" IsVisible="{Binding ShowPublished}" Command="{Binding AskEndCommand}" AutomationProperties.Name="Sınavı bitir" />
         <Button Content="Kopyala" IsVisible="{Binding ShowCompleted}" Command="{Binding CopyCommand}" AutomationProperties.Name="Sınavı kopyala" />
+        <Button Content="Sonuçlar" IsVisible="{Binding CanViewResults}" Command="{Binding OpenResultsCommand}" AutomationProperties.Name="Sonuçlar" />
+        <Button Content="Loglar" IsVisible="{Binding CanViewResults}" Command="{Binding OpenLogsCommand}" AutomationProperties.Name="Loglar" />
       </StackPanel>
     </StackPanel>
 

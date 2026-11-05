@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ProgLab.Client.Core;
 using ProgLab.Shared.Dtos;
+using ProgLab.Shared.Enums;
 
 namespace ProgLab.InstructorApp.ViewModels;
 
@@ -11,6 +12,9 @@ public sealed partial class MainWindowViewModel : ObservableObject
     private readonly ApiClient _api;
     private readonly ExamHubClient? _hub;
     private readonly Action<Action> _ui;
+
+    /// <summary>Sonuç, log veya canlı ekrandan dönünce aynı sekme açılır.</summary>
+    private ExamStatus _examTab = ExamStatus.Draft;
 
     [ObservableProperty]
     private string _title = "Prog. Lab. Sınav Platformu — Eğitmen";
@@ -87,10 +91,14 @@ public sealed partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void ShowExams() => OpenExamList(null);
 
-    private void OpenExamList(string? message)
+    private void OpenExamList(string? message) => OpenExamList(message, ExamStatus.Draft);
+
+    private void BackToExamList() => OpenExamList(null, _examTab);
+
+    private void OpenExamList(string? message, ExamStatus tab)
     {
         LeaveCurrentPage();
-        var page = new ExamListViewModel(_api, OpenExamEditor, message, OpenLiveExam);
+        var page = new ExamListViewModel(_api, OpenExamEditor, message, OpenLiveExam, OpenResults, OpenLogs, tab);
         CurrentPage = page;
         _ = page.LoadCommand.ExecuteAsync(null);
     }
@@ -104,11 +112,44 @@ public sealed partial class MainWindowViewModel : ObservableObject
 
     private void OpenLiveExam(int examId)
     {
+        RememberExamTab();
         LeaveCurrentPage();
-        var page = new LiveExamViewModel(_api, _hub, examId, _ui, () => OpenExamList(null));
+        var page = new LiveExamViewModel(_api, _hub, examId, _ui, BackToExamList, OpenResults);
         CurrentPage = page;
         page.Start();
         _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void OpenResults(int examId)
+    {
+        RememberExamTab();
+        LeaveCurrentPage();
+        var page = new ResultsViewModel(_api, examId, id => OpenSubmission(id, examId), BackToExamList);
+        CurrentPage = page;
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void OpenSubmission(long submissionId, int examId)
+    {
+        var page = new SubmissionDetailViewModel(_api, submissionId, () => OpenResults(examId));
+        CurrentPage = page;
+        _ = page.LoadCommand.ExecuteAsync(null);
+    }
+
+    private void OpenLogs(int examId)
+    {
+        RememberExamTab();
+        var page = new LogsViewModel(_api, examId, BackToExamList);
+        CurrentPage = page;
+        _ = page.ApplyCommand.ExecuteAsync(null);
+    }
+
+    private void RememberExamTab()
+    {
+        if (CurrentPage is ExamListViewModel list)
+        {
+            _examTab = list.Status;
+        }
     }
 
     private void LeaveCurrentPage()

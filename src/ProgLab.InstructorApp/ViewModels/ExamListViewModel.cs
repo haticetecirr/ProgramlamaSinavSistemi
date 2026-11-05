@@ -26,15 +26,22 @@ public sealed record ExamRow(ExamSummaryDto Exam)
 }
 
 /// <summary>Sınav listesi: durum sekmeleri, yeni, düzenle, sil, bitir, kopyala.</summary>
-public sealed partial class ExamListViewModel(ApiClient api, Action<int?> openEditor, string? initialMessage = null, Action<int>? openLive = null) : ObservableObject
+public sealed partial class ExamListViewModel(
+    ApiClient api,
+    Action<int?> openEditor,
+    string? initialMessage = null,
+    Action<int>? openLive = null,
+    Action<int>? openResults = null,
+    Action<int>? openLogs = null,
+    ExamStatus initialStatus = ExamStatus.Draft) : ObservableObject
 {
     private int _loadVersion;
 
     public ObservableCollection<ExamRow> Exams { get; } = [];
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowDrafts), nameof(ShowPublished), nameof(ShowCompleted))]
-    private ExamStatus _status = ExamStatus.Draft;
+    [NotifyPropertyChangedFor(nameof(ShowDrafts), nameof(ShowPublished), nameof(ShowCompleted), nameof(CanViewResults))]
+    private ExamStatus _status = initialStatus;
 
     [ObservableProperty]
     private ExamRow? _selectedExam;
@@ -58,6 +65,9 @@ public sealed partial class ExamListViewModel(ApiClient api, Action<int?> openEd
     public bool IsConfirmingDelete => PendingDelete is not null;
 
     public bool IsConfirmingEnd => PendingEnd is not null;
+
+    /// <summary>Taslağın sonucu ve logu olmaz.</summary>
+    public bool CanViewResults => Status != ExamStatus.Draft;
 
     public bool ShowDrafts
     {
@@ -100,11 +110,19 @@ public sealed partial class ExamListViewModel(ApiClient api, Action<int?> openEd
     }
 
     [RelayCommand]
-    private void OpenLive()
+    private void OpenLive() => OpenSelected(openLive);
+
+    [RelayCommand]
+    private void OpenResults() => OpenSelected(openResults);
+
+    [RelayCommand]
+    private void OpenLogs() => OpenSelected(openLogs);
+
+    private void OpenSelected(Action<int>? open)
     {
         if (SelectedExam is { } row)
         {
-            openLive?.Invoke(row.Exam.Id);
+            open?.Invoke(row.Exam.Id);
         }
         else
         {

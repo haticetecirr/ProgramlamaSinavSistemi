@@ -28,6 +28,7 @@
       <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
       <StackPanel Orientation="Horizontal" Spacing="8">
         <Button Content="Listeye dön" Command="{Binding BackCommand}" AutomationProperties.Name="Listeye dön" />
+        <Button Content="Sonuçlar" Command="{Binding OpenResultsCommand}" AutomationProperties.Name="Sonuçlar" />
         <Button Content="Bitir" IsVisible="{Binding IsRunning}" Command="{Binding AskEndCommand}" AutomationProperties.Name="Bitir" />
       </StackPanel>
     </StackPanel>

@@ -30,6 +30,46 @@ public sealed class ExamLogWriter(IConfiguration configuration, IWebHostEnvironm
 
     public string? GetPath(int examId) => Directory is { } folder ? Path.Combine(folder, $"exam-{examId}.log") : null;
 
+    /// <summary>Ham dosyayı okur. Dosya yoksa verilen satırlarla (tablodan) yeniden üretir ve kaydeder.</summary>
+    public async Task<string> ReadOrCreateAsync(int examId, Func<int, CancellationToken, Task<IReadOnlyList<string>>> buildLines, CancellationToken ct)
+    {
+        if (GetPath(examId) is not { } path)
+        {
+            return ToText(await buildLines(examId, ct));
+        }
+
+        var gate = _gates.GetOrAdd(examId, _ => new SemaphoreSlim(1, 1));
+        await gate.WaitAsync(ct);
+        try
+        {
+            if (File.Exists(path))
+            {
+                return await File.ReadAllTextAsync(path, Utf8, ct);
+            }
+
+            var text = ToText(await buildLines(examId, ct));
+            try
+            {
+                System.IO.Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+                await File.WriteAllTextAsync(path, text, Utf8, ct);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                // Dosyaya yazılamasa da içerik gösterilir.
+                logger.LogError(ex, "Sınav log dosyası yeniden üretilemedi: {Path}", path);
+            }
+
+            return text;
+        }
+        finally
+        {
+            gate.Release();
+        }
+    }
+
+    private static string ToText(IReadOnlyList<string> lines) =>
+        lines.Count == 0 ? "" : string.Join(Environment.NewLine, lines) + Environment.NewLine;
+
     public async Task WriteAsync(int examId, string line, CancellationToken ct = default)
     {
         if (GetPath(examId) is not { } path)

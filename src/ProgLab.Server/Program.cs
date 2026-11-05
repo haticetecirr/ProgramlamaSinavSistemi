@@ -54,6 +54,8 @@ builder.Services.AddScoped<ClassService>();
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<ExamService>();
+builder.Services.AddScoped<ResultService>();
+builder.Services.AddScoped<LogQueryService>();
 builder.Services.AddScoped<ExamNotifier>();
 builder.Services.AddScoped<StudentExamService>();
 builder.Services.AddScoped<SubmissionService>();

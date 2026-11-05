@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 using ProgLab.Server.Data;
 using ProgLab.Server.Data.Entities;
@@ -18,6 +19,11 @@ public sealed class ActivityRecorder(AppDbContext db, ExamLogWriter writer)
     public void Add(string eventType, int examId, int? userId, Submission? submission, long? submissionId, IPAddress? ip, object details, string text)
     {
         var now = DateTimeOffset.UtcNow;
+
+        // Satır metni de saklanır: panel ve (kaybolursa) log dosyası tablodan aynen üretilir.
+        var json = JsonSerializer.SerializeToNode(details)!.AsObject();
+        json["summary"] = text;
+
         db.ActivityLogs.Add(new ActivityLog
         {
             OccurredAt = now,
@@ -27,9 +33,20 @@ public sealed class ActivityRecorder(AppDbContext db, ExamLogWriter writer)
             Submission = submission,
             SubmissionId = submission is null ? submissionId : null,
             Ip = ip,
-            Details = JsonSerializer.Serialize(details)
+            Details = json.ToJsonString()
         });
         _pending.Add(new PendingLine(examId, now, eventType, userId, ip?.ToString(), text));
+    }
+
+    /// <summary>Kaydın insan okuyacak metni. Bu alan eklenmeden önce yazılmış kayıtta ham ayrıntı döner.</summary>
+    public static string SummaryOf(string? details)
+    {
+        if (string.IsNullOrEmpty(details))
+        {
+            return "";
+        }
+
+        return JsonNode.Parse(details)?["summary"]?.GetValue<string>() ?? details;
     }
 
     /// <summary>İşlem geri alındıysa bekleyen dosya satırları da atılır.</summary>

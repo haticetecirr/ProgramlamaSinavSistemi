@@ -192,6 +192,51 @@ public sealed class ApiClient(HttpClient http, TokenStore? tokens = null)
     public Task<OverrideScoreResponse> OverrideScoreAsync(long answerId, OverrideScoreRequest request, CancellationToken ct = default) =>
         SendAsync<OverrideScoreResponse>(HttpMethod.Put, $"api/answers/{answerId}/score", request, ct);
 
+    public Task<ExamResultsDto> GetExamResultsAsync(int examId, CancellationToken ct = default) =>
+        SendAsync<ExamResultsDto>(HttpMethod.Get, $"api/exams/{examId}/results", null, ct);
+
+    public Task<SubmissionDetailDto> GetSubmissionDetailAsync(long submissionId, CancellationToken ct = default) =>
+        SendAsync<SubmissionDetailDto>(HttpMethod.Get, $"api/submissions/{submissionId}", null, ct);
+
+    public Task<PagedResult<LogEntryDto>> GetExamLogsAsync(
+        int examId,
+        string? eventType = null,
+        string? username = null,
+        DateTimeOffset? from = null,
+        DateTimeOffset? to = null,
+        int page = 1,
+        CancellationToken ct = default)
+    {
+        var query = new List<string> { $"page={page}" };
+        if (!string.IsNullOrWhiteSpace(eventType))
+        {
+            query.Add($"event={Uri.EscapeDataString(eventType)}");
+        }
+
+        if (!string.IsNullOrWhiteSpace(username))
+        {
+            query.Add($"username={Uri.EscapeDataString(username.Trim())}");
+        }
+
+        if (from is { } start)
+        {
+            query.Add($"from={Uri.EscapeDataString(start.ToString("O"))}");
+        }
+
+        if (to is { } end)
+        {
+            query.Add($"to={Uri.EscapeDataString(end.ToString("O"))}");
+        }
+
+        return SendAsync<PagedResult<LogEntryDto>>(HttpMethod.Get, $"api/exams/{examId}/logs?{string.Join('&', query)}", null, ct);
+    }
+
+    public async Task<string> GetExamLogFileAsync(int examId, CancellationToken ct = default)
+    {
+        using var response = await SendCoreAsync(HttpMethod.Get, $"api/exams/{examId}/logs/file", null, ct);
+        return await response.Content.ReadAsStringAsync(ct);
+    }
+
     public Task<LiveExamDto> GetLiveExamAsync(int examId, CancellationToken ct = default) =>
         SendAsync<LiveExamDto>(HttpMethod.Get, $"api/exams/{examId}/live", null, ct);
 

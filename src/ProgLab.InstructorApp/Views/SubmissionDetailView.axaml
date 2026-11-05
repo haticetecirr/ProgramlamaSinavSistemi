@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.InstructorApp.ViewModels"
+             x:Class="ProgLab.InstructorApp.Views.SubmissionDetailView"
+             x:DataType="vm:SubmissionDetailViewModel">
+  <DockPanel Margin="16">
+    <DockPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+      <TextBlock DockPanel.Dock="Right" Classes="section" Text="{Binding TotalText}" Margin="12,0,0,0" />
+      <StackPanel Spacing="2">
+        <TextBlock Classes="title" Text="{Binding Title}" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding StudentText}" Opacity="0.8" TextWrapping="Wrap" />
+      </StackPanel>
+    </DockPanel>
+
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,8,0,0">
+      <TextBlock Text="{Binding GradingHint}" Opacity="0.7" TextWrapping="Wrap" />
+      <TextBlock Classes="error" Text="{Binding ErrorMessage}" IsVisible="{Binding ErrorMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <TextBlock Text="{Binding StatusMessage}" IsVisible="{Binding StatusMessage, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <Button Content="Sonuçlara dön" Command="{Binding BackCommand}" AutomationProperties.Name="Sonuçlara dön" />
+    </StackPanel>
+
+    <ScrollViewer>
+      <ItemsControl ItemsSource="{Binding Questions}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="vm:QuestionResultRow">
+            <Border Padding="12" Margin="0,0,12,8" BorderBrush="#555555" BorderThickness="1" CornerRadius="4">
+              <StackPanel Spacing="4">
+                <DockPanel>
+                  <TextBlock DockPanel.Dock="Right" Text="{Binding ScoreText}" FontWeight="SemiBold" Margin="12,0,0,0" />
+                  <TextBlock Classes="section" Text="{Binding Heading}" />
+                </DockPanel>
+                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" />
+                <TextBlock Text="Öğrencinin cevabı:" Opacity="0.7" Margin="0,4,0,0" />
+                <SelectableTextBlock Text="{Binding AnswerText}" TextWrapping="Wrap" />
+                <TextBlock Text="Doğru cevap:" Opacity="0.7" Margin="0,4,0,0" />
+                <SelectableTextBlock Text="{Binding CorrectAnswer}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding NoteText, StringFormat='Not: {0}'}" TextWrapping="Wrap" Opacity="0.8"
+                           IsVisible="{Binding NoteText, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <Grid ColumnDefinitions="90,*,Auto" ColumnSpacing="8" Margin="0,6,0,0" IsVisible="{Binding CanOverride}">
+                  <TextBox Text="{Binding ScoreInput}" PlaceholderText="Puan" AutomationProperties.Name="{Binding ScoreName}" />
+                  <TextBox Grid.Column="1" Text="{Binding NoteInput}" PlaceholderText="Not (isteğe bağlı)" MaxLength="300" AutomationProperties.Name="{Binding NoteName}" />
+                  <Button Grid.Column="2" Content="Puanı düzelt" Command="{Binding SaveCommand}" AutomationProperties.Name="{Binding SaveName}" />
+                </Grid>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>
