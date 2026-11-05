@@ -177,6 +177,12 @@ public sealed class ApiClient(HttpClient http, TokenStore? tokens = null)
     public Task<IReadOnlyList<StudentExamSummaryDto>> GetLobbyAsync(CancellationToken ct = default) =>
         SendAsync<IReadOnlyList<StudentExamSummaryDto>>(HttpMethod.Get, "api/student/exams", null, ct);
 
+    public Task<JoinExamResponse> JoinExamAsync(int examId, CancellationToken ct = default) =>
+        SendAsync<JoinExamResponse>(HttpMethod.Post, $"api/student/exams/{examId}/join", null, ct);
+
+    public Task<StudentPaperDto> GetPaperAsync(int examId, CancellationToken ct = default) =>
+        SendAsync<StudentPaperDto>(HttpMethod.Get, $"api/student/exams/{examId}/paper", null, ct);
+
     public Task<IReadOnlyList<StudentConnectionDto>> GetConnectedStudentsAsync(CancellationToken ct = default) =>
         SendAsync<IReadOnlyList<StudentConnectionDto>>(HttpMethod.Get, "api/connections/students", null, ct);
 

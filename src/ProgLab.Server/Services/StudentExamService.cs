@@ -42,7 +42,8 @@ public sealed class StudentExamService(AppDbContext db)
                     state,
                     e.StartsAt,
                     e.EndsAt,
-                    state == StudentExamState.Open ? ExamRules.RemainingSeconds(e.EndsAt, now) : null);
+                    state == StudentExamState.Open ? ExamRules.RemainingSeconds(e.EndsAt, now) : null,
+                    e.SubmissionStatus is not null);
             })
             .OrderBy(e => e.State)
             .ThenBy(e => e.State == StudentExamState.Completed ? -e.EndsAt.ToUnixTimeSeconds() : e.EndsAt.ToUnixTimeSeconds())

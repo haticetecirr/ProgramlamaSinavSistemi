@@ -20,6 +20,8 @@ public sealed class ExamHub(AppDbContext db, ConnectionTracker tracker) : Hub
 
     public static string ClassGroup(int classId) => $"class-{classId}";
 
+    public static string ExamGroup(int examId) => $"exam-{examId}";
+
     public override async Task OnConnectedAsync()
     {
         var userId = Context.User!.GetUserId();
@@ -70,6 +72,16 @@ public sealed class ExamHub(AppDbContext db, ConnectionTracker tracker) : Hub
         foreach (var classId in classIds)
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, ClassGroup(classId), ct);
+        }
+
+        // Yeniden bağlanan öğrenci, sürmekte olan sınavının süre bildirimlerini almaya devam eder.
+        var runningExamIds = await db.Submissions.AsNoTracking()
+            .Where(s => s.StudentId == studentId && s.Exam!.Status == ExamStatus.Published)
+            .Select(s => s.ExamId)
+            .ToListAsync(ct);
+        foreach (var examId in runningExamIds)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, ExamGroup(examId), ct);
         }
 
         var ip = Context.GetHttpContext()?.Connection.RemoteIpAddress?.ToString();

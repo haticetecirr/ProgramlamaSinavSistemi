@@ -10,9 +10,18 @@ namespace ProgLab.Server.Services;
 /// Servis katmanının SignalR çıkışı. Bildirim veritabanı işlemi bittikten sonra gönderilir ve
 /// hatası işlemi geri almaz: bağlı olmayan öğrenci sınavı girişte veya lobi yenilenince zaten görür.
 /// </summary>
-public sealed class ExamNotifier(IHubContext<ExamHub> hub, ILogger<ExamNotifier> logger)
+public sealed class ExamNotifier(IHubContext<ExamHub> hub, ConnectionTracker tracker, ILogger<ExamNotifier> logger)
 {
     public const string ReasonManual = "Manual";
+
+    /// <summary>Katılan öğrencinin o anki bağlantılarını sınav grubuna ekler; süre bildirimleri bu gruba gider.</summary>
+    public Task AddStudentToExamAsync(int studentId, int examId) => SendSafelyAsync(async () =>
+    {
+        foreach (var connectionId in tracker.GetConnectionIds(studentId))
+        {
+            await hub.Groups.AddToGroupAsync(connectionId, ExamHub.ExamGroup(examId));
+        }
+    });
 
     public Task ExamPublishedAsync(Exam exam) => SendSafelyAsync(() =>
         hub.Clients.Group(ExamHub.ClassGroup(exam.ClassId)).SendAsync(

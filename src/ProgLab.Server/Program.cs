@@ -28,10 +28,16 @@ if (!builder.Environment.IsEnvironment("Testing"))
 
 // Uygulama logu: konsol + günlük dönen dosya (logs/server-<tarih>.log).
 var logFilePath = Path.Combine(builder.Environment.ContentRootPath, "logs", "server-.log");
-builder.Services.AddSerilog(logger => logger
-    .ReadFrom.Configuration(builder.Configuration)
-    .WriteTo.Console()
-    .WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day));
+builder.Services.AddSerilog(logger =>
+{
+    logger.ReadFrom.Configuration(builder.Configuration).WriteTo.Console();
+
+    // Paralel testlerin her biri ayrı dosya açmasın diye test ortamında dosyaya yazılmaz.
+    if (!builder.Environment.IsEnvironment("Testing"))
+    {
+        logger.WriteTo.File(logFilePath, rollingInterval: RollingInterval.Day);
+    }
+});
 
 builder.Services.AddDbContext<AppDbContext>((services, options) =>
     AppDbContext.Configure(options, services.GetRequiredService<IConfiguration>().GetConnectionString("Default")));
@@ -48,6 +54,9 @@ builder.Services.AddScoped<QuestionService>();
 builder.Services.AddScoped<ExamService>();
 builder.Services.AddScoped<ExamNotifier>();
 builder.Services.AddScoped<StudentExamService>();
+builder.Services.AddScoped<SubmissionService>();
+builder.Services.Configure<ExamTimerOptions>(builder.Configuration.GetSection(ExamTimerOptions.Section));
+builder.Services.AddHostedService<ExamTimerService>();
 
 // Yerel ağ: HTTPS, sunucu duyurusu ve gerçek zamanlı bildirimler.
 builder.Services.Configure<DiscoveryOptions>(builder.Configuration.GetSection(DiscoveryOptions.Section));

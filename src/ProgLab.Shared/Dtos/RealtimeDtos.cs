@@ -22,6 +22,7 @@ public enum StudentExamState
 
 /// <summary>Lobideki sınav kartı. Soru veya cevap anahtarı içermez.</summary>
 /// <param name="RemainingSeconds">Yalnızca açık sınavda; sunucu saatiyle hesaplanır.</param>
+/// <param name="HasStarted">Öğrenci daha önce katıldı mı? Düğme "Katıl" yerine "Devam et" olur.</param>
 public sealed record StudentExamSummaryDto(
     int Id,
     string Title,
@@ -29,4 +30,5 @@ public sealed record StudentExamSummaryDto(
     StudentExamState State,
     DateTimeOffset StartsAt,
     DateTimeOffset EndsAt,
-    int? RemainingSeconds);
+    int? RemainingSeconds,
+    bool HasStarted);

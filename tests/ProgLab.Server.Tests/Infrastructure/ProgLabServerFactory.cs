@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 namespace ProgLab.Server.Tests.Infrastructure;
 
 /// <summary>Sunucuyu bellekte, verilen bağlantı dizesiyle başlatır. "Testing" ortamı gerçek yerel ayarları okumaz.</summary>
-public sealed class ProgLabServerFactory(string connectionString, int authPermitPerMinute = 100_000) : WebApplicationFactory<Program>
+public sealed class ProgLabServerFactory(string connectionString, int authPermitPerMinute = 100_000, int timeSyncSeconds = 0) : WebApplicationFactory<Program>
 {
     public const string InstructorTemporaryPassword = "Test-Gecici-Parola-1";
 
@@ -19,5 +19,6 @@ public sealed class ProgLabServerFactory(string connectionString, int authPermit
         builder.UseSetting("Jwt:SigningKey", SigningKey);
         builder.UseSetting("RateLimiting:AuthPermitPerMinute", authPermitPerMinute.ToString());
         builder.UseSetting("Discovery:Enabled", "false"); // Testler ağa duyuru yapmaz.
+        builder.UseSetting("ExamTimer:TimeSyncSeconds", timeSyncSeconds.ToString()); // Gereken test açar.
     }
 }

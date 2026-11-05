@@ -1,0 +1,12 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:ProgLab.StudentApp.ViewModels"
+             x:Class="ProgLab.StudentApp.Views.ClassicQuestionView"
+             x:DataType="vm:ClassicQuestionViewModel">
+  <StackPanel Spacing="10" Margin="0,0,12,0">
+    <TextBlock Classes="section" Text="{Binding Heading}" />
+    <TextBlock Text="{Binding Text}" TextWrapping="Wrap" FontSize="16" />
+    <TextBlock Text="Cevabınız (en fazla 2000 karakter)" Opacity="0.7" />
+    <TextBox Text="{Binding TextAnswer}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="140" MaxLength="2000" AutomationProperties.Name="Cevabınız" />
+  </StackPanel>
+</UserControl>

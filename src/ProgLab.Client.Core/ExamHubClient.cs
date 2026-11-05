@@ -31,6 +31,7 @@ public sealed class ExamHubClient : IAsyncDisposable
         _connection.On<ExamEndedEvent>(HubEvents.ExamEnded, e => ExamEnded?.Invoke(e));
         _connection.On<StudentConnectionDto>(HubEvents.StudentConnected, e => StudentConnected?.Invoke(e));
         _connection.On<StudentConnectionDto>(HubEvents.StudentDisconnected, e => StudentDisconnected?.Invoke(e));
+        _connection.On<TimeSyncEvent>(HubEvents.TimeSync, e => TimeSync?.Invoke(e));
         _connection.On(HubEvents.Ready, OnReady);
 
         _connection.Reconnecting += _ => OnConnectionLost(null);
@@ -40,6 +41,8 @@ public sealed class ExamHubClient : IAsyncDisposable
     public event Action<ExamPublishedEvent>? ExamPublished;
 
     public event Action<ExamEndedEvent>? ExamEnded;
+
+    public event Action<TimeSyncEvent>? TimeSync;
 
     public event Action<StudentConnectionDto>? StudentConnected;
 
@@ -62,7 +65,12 @@ public sealed class ExamHubClient : IAsyncDisposable
     /// <summary>Arka planda bağlanana kadar dener; sunucu sonradan açılsa da bağlantı kurulur.</summary>
     public void StartInBackground()
     {
-        _startLoop?.Cancel();
+        // Bağlıysa veya zaten bağlanmaya çalışıyorsa yeniden başlatılmaz (lobi ile sınav ekranı aynı bağlantıyı kullanır).
+        if (_connection.State != HubConnectionState.Disconnected || _startLoop is { IsCancellationRequested: false })
+        {
+            return;
+        }
+
         var cts = _startLoop = new CancellationTokenSource();
         _ = Task.Run(async () =>
         {
@@ -71,6 +79,7 @@ public sealed class ExamHubClient : IAsyncDisposable
                 try
                 {
                     await StartAsync(cts.Token);
+                    cts.Cancel(); // Döngü bitti; sonraki StartInBackground yeniden başlayabilsin.
                     return;
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException || !cts.IsCancellationRequested)
