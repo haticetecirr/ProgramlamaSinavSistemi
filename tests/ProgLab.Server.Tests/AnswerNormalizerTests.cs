@@ -6,7 +6,7 @@ public sealed class AnswerNormalizerTests
 {
     [Theory]
     [InlineData("  Yığın. ", "yığın")]            // VT-32
-    [InlineData("IŞIK", "ışık")]                  // tr-TR: I -> ı
+    [InlineData("IŞIK", "ışık")]                  // VT-33 (onaylanan örnek); tr-TR: I -> ı
     [InlineData("İNCİ", "inci")]                  // tr-TR: İ -> i
     [InlineData("bağlı\t\r\n  liste", "bağlı liste")]
     [InlineData("stack ?!", "stack")]
@@ -29,8 +29,8 @@ public sealed class AnswerNormalizerTests
     }
 
     /// <summary>
-    /// Dokümandaki VT-33 örneği "ISIK" ile "ışık"ın eşleşmesini bekliyor, ama S ile Ş farklı harflerdir.
-    /// Bu test mevcut (birebir eşleşme) kuralını belgeler; karar için kullanıcıya bildirildi.
+    /// S ile Ş farklı harflerdir; birebir eşleşme kuralı korunur (kullanıcı kararı). Dokümandaki
+    /// "ISIK" örneği yerine VT-33 "IŞIK" ile uygulanır. "ISIK" için eğitmen alternatif cevap ekleyebilir.
     /// </summary>
     [Fact]
     public void Normalize_DoesNotTreatSAndSCedillaAsSameLetter()

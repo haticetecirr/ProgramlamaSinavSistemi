@@ -111,19 +111,15 @@ public sealed class DatabaseRuleTests(MigratedDatabaseFixture fixture) : IClassF
         await AssertViolationAsync(db, CheckViolation, "ck_exams_duration");
     }
 
-    /// <summary>
-    /// Dokümandaki kısıt aynen uygulandı: SQL'de "NULL > 0" sonucu NULL olduğu için CHECK boş süreyi engellemez.
-    /// Bu test mevcut davranışı belgeler; kısıtın güçlendirilmesi kullanıcının kararına sunuldu.
-    /// </summary>
     [Fact]
-    public async Task ExamWithNullDuration_IsNotBlockedByDocumentedCheck()
+    public async Task ExamWithNullDuration_IsRejected_ForExamKind()
     {
         await using var db = fixture.CreateDbContext();
         var exam = await BuildExamAsync(db);
         exam.DurationMinutes = null;
         db.Exams.Add(exam);
 
-        await db.SaveChangesAsync();
+        await AssertViolationAsync(db, CheckViolation, "ck_exams_duration");
     }
 
     [Fact]

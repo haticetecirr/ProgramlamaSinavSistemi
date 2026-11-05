@@ -11,7 +11,8 @@ public sealed class ExamConfiguration : IEntityTypeConfiguration<Exam>
     {
         b.ToTable(t =>
         {
-            t.HasCheckConstraint("ck_exams_duration", "kind <> 1 OR duration_minutes > 0");
+            // IS NOT NULL şart: tek başına "duration_minutes > 0" boş süreyi engellemez (NULL > 0 sonucu NULL'dur).
+            t.HasCheckConstraint("ck_exams_duration", "kind <> 1 OR (duration_minutes IS NOT NULL AND duration_minutes > 0)");
             t.HasCheckConstraint("ck_exams_time_window", "ends_at IS NULL OR starts_at < ends_at");
             t.HasCheckConstraint("ck_exams_published_has_times", "status = 1 OR (starts_at IS NOT NULL AND ends_at IS NOT NULL)");
         });
