@@ -164,8 +164,9 @@ catch (Exception ex)
     throw;
 }
 
-app.UseMiddleware<ApiExceptionMiddleware>();
+// İstek logu en dışta: hatalar yanıta çevrildikten sonra gerçek durum kodunu yazar (401'i 500 göstermez).
 app.UseSerilogRequestLogging();
+app.UseMiddleware<ApiExceptionMiddleware>();
 app.UseRouting();
 app.UseRateLimiter();
 app.UseAuthentication();
