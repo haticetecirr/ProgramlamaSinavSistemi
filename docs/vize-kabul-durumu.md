@@ -29,11 +29,11 @@ Laboratuvar sütunu: "Kayıtta var" veritabanı loglarından doğrulandı; "Bild
 | H10 | Süre sonrası gönderim yok | VT-27 (kaynak denetimi), VT-28 – VT-30 | VT-27 bildirildi. **VT-30 yapılmadı** (ağda; tek bilgisayarda pencereyle denendi) |
 | H12 | Teslim saati logda ve panelde | VT-36 | Kayıtta var (05.11, 2 bilgisayar) |
 
-## Açık kararlar
+## Kararlar
 
 | Konu | Durum |
 |---|---|
-| Bağlantı olayları `activity_logs` tablosuna yazılmıyor | Doküman 6.4 ile 11.4 çelişiyor; ekip kararı bekliyor |
+| Bağlantı olayları `activity_logs` tablosuna yazılmıyor | Karar verildi (06.11.2026): vizede olduğu gibi kalır. Eğitmen ekranında canlı gösterilir, kalıcı loglanmaz. Ders isteri gönderim saatlerini istiyor ve o karşılanıyor. Doküman 6.4 ile 11.4 çelişiyordu |
 | `SCORE_OVERRIDDEN` satırı ham dosyada bir karakter kayıyor | Doküman biçimi korundu; işlevi etkilemez |
 
 ## Yük testi

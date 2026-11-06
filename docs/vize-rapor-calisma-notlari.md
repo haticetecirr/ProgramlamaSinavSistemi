@@ -37,7 +37,7 @@ Sunucu yolları `src/ProgLab.Server/`, istemci yolları `src/` altındadır. Tes
 - **Eksik / doğrulanmamış:**
   - 06.11 sabah okul ağında A bilgisayarı WiFi kapatılıp açıldıktan sonra sunucuya dönmedi; nedeni belirlenemedi, `Test-NetConnection` sonucu alınmadı. 12:45'te telefon erişim noktasında aynı adım çalıştı.
   - Sunucunun ağı değişirse adresi de değişir; öğrenci uygulaması yeni adresi kendisi bulmaz, yeniden açıp bağlanmak gerekir (06.11 12:31 gözlendi). Bu sırada yazılıp gönderilememiş cevap uygulama kapanınca kaybolur, çünkü kuyruk yalnız bellektedir.
-  - Bağlantı olayları `activity_logs` tablosuna yazılmıyor (doküman 6.4 ile 11.4 çelişiyor, karar bekliyor).
+  - Bağlantı olayları `activity_logs` tablosuna yazılmıyor, eğitmen ekranında yalnız canlı görünür. Doküman 6.4 ile 11.4 çelişiyordu; vizede böyle kalmasına karar verildi (06.11.2026). Raporda sınır olarak belirtin.
 
 ### V3. Soru bankası
 - **Durum:** Geliştirildi.
@@ -320,7 +320,7 @@ NORMALİZE(metin):
 
 **Uygulama logu:** İstek logu `ApiExceptionMiddleware`'in dışında çalışır, gerçek durum kodunu yazar. 06.11'e kadar içinde olduğu için 401 gibi cevaplar logda 500 ve `[ERR]` görünüyordu (kullanıcıya doğru kod gidiyordu).
 
-**Bilinen eksikler:** Bağlantı olayları tabloya yazılmıyor. `SECOND_DEVICE` IP'ye bakar: aynı bilgisayarın ağı değişirse de yazılır (06.11 12:36 gözlendi). `SCORE_OVERRIDDEN` 16 karakter olduğundan ham dosyada o satır bir karakter kayıyor.
+**Bilinen sınırlar:** Bağlantı olayları tabloya yazılmıyor (ekip kararı). `SECOND_DEVICE` IP'ye bakar: aynı bilgisayarın ağı değişirse de yazılır (06.11 12:36 gözlendi). `SCORE_OVERRIDDEN` 16 karakter olduğundan ham dosyada o satır bir karakter kayıyor.
 
 ## 12. Gerçek test sonuçları
 
