@@ -124,9 +124,11 @@ public sealed class ExamHubClient : IAsyncDisposable
     private void OnReady()
     {
         _isReady = true;
-        _ready.TrySetResult();
         _reportedConnected = IsConnected;
         StateChanged?.Invoke();
+
+        // Sinyal en sonda: StartAsync döndüğünde ekran bağlantı durumunu çoktan öğrenmiş olur.
+        _ready.TrySetResult();
     }
 
     /// <summary>
