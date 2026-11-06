@@ -23,7 +23,7 @@ Laboratuvar sütunu: "Kayıtta var" veritabanı loglarından doğrulandı; "Bild
 | V3 | Soru bankası | VT-10 – VT-14 | — |
 | V4 | Sınav hazırlama ve eş zamanlı gönderme | VT-15, VT-16, VT-18, VT-37 (bildirim süresi) | Yayın ve katılım kayıtta var. VT-17 (1 sn) bildirildi, 2 lobi ile |
 | V5 | Öğrencinin süre içinde çözüp göndermesi | VT-19 – VT-23 | VT-19, VT-21 kayıtta var (06.11) |
-| V6 | Cevap toplama ve log dosyası | VT-24 – VT-26, VT-36 | Otomatik kayıt kayıtta var. **VT-24 tamamlanmadı**: öğrenci geri bağlanamadı, kopukken yazılan cevabın gidişi görülmedi. VT-36 kayıtta var (05.11, 2 bilgisayar) |
+| V6 | Cevap toplama ve log dosyası | VT-24 – VT-26, VT-36 | Otomatik kayıt kayıtta var. VT-24: 06.11 12:45 denemesinde kuyruktaki cevap yeniden giriş olmadan sunucuya geldi (kayıtta var; kopukken yazıldığı bildirildi). Aynı gün sabah okul ağındaki denemede cevap gelmedi, nedeni belirlenemedi. VT-36 kayıtta var (05.11, 2 bilgisayar) |
 | V7 | Anında puanlama | VT-31 – VT-34 | VT-34 kayıtta var (05.11, 2 bilgisayar) |
 | V8 | Öğrenci bazında sonuçlar | VT-35 | Bildirildi (05.11, 2 bilgisayar) |
 | H10 | Süre sonrası gönderim yok | VT-27 (kaynak denetimi), VT-28 – VT-30 | VT-27 bildirildi. **VT-30 yapılmadı** (ağda; tek bilgisayarda pencereyle denendi) |

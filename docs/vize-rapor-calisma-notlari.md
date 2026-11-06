@@ -35,7 +35,8 @@ Sunucu yolları `src/ProgLab.Server/`, istemci yolları `src/` altındadır. Tes
 - **Tablolar:** Doğrudan yok (bağlı öğrenci listesi bellekte, `ConnectionTracker`).
 - **Testler:** Geçti (otomatik): `DiscoveryTests` 16, `CertificateTests` 10, `HealthEndpointTests` 5, `RealtimeTests` 14, `ServerAddressTests` 12, `StudentConnectFlowTests` 2, `TimeSyncTests` 1, `HubConnectionStateTests` 1. Laboratuvar: 3 ayrı bilgisayar kayıtta var (06.11: eğitmen `172.2.2.139`, öğrenciler `172.2.3.75`, `172.2.0.209`). VT-08: Bildirildi.
 - **Eksik / doğrulanmamış:**
-  - 06.11'de A bilgisayarı WiFi kapatılıp açıldıktan sonra sunucuya dönmedi. Nedeni belirlenemedi; `Test-NetConnection` sonucu alınmadı.
+  - 06.11 sabah okul ağında A bilgisayarı WiFi kapatılıp açıldıktan sonra sunucuya dönmedi; nedeni belirlenemedi, `Test-NetConnection` sonucu alınmadı. 12:45'te telefon erişim noktasında aynı adım çalıştı.
+  - Sunucunun ağı değişirse adresi de değişir; öğrenci uygulaması yeni adresi kendisi bulmaz, yeniden açıp bağlanmak gerekir (06.11 12:31 gözlendi). Bu sırada yazılıp gönderilememiş cevap uygulama kapanınca kaybolur, çünkü kuyruk yalnız bellektedir.
   - Bağlantı olayları `activity_logs` tablosuna yazılmıyor (doküman 6.4 ile 11.4 çelişiyor, karar bekliyor).
 
 ### V3. Soru bankası
@@ -68,7 +69,7 @@ Sunucu yolları `src/ProgLab.Server/`, istemci yolları `src/` altındadır. Tes
 - **API:** Cevap ve teslim uçları; `GET /api/exams/{id}/logs`, `GET /api/exams/{id}/logs/file`.
 - **Tablolar:** `submissions`, `answers`, `activity_logs`; dosya `logs/exams/exam-<id>.log`.
 - **Testler:** Geçti (otomatik): `AnswerCollectionApiTests` 15, `AnswerSaveQueueTests` 9, `ExamTimerAndLogFileTests` 5, `RawLogFileTests` 2, `ResultsAndLogsTests` 18 (ortak). Laboratuvar: otomatik kayıt kayıtta var (06.11); teslim satırları kayıtta var (05.11).
-- **Eksik / doğrulanmamış:** **VT-24 tamamlanmadı.** Otomatik testte geçiyor, ama gerçek WiFi kopmasında A'nın yazdığı `kablo testi 7` sunucuya hiç ulaşmadı, cevap `pointer` kaldı. Kopukken çıkan uyarı Bildirildi.
+- **Eksik / doğrulanmamış:** VT-24 gerçek ağda bir kez çalıştı: 06.11 12:45'te kuyruktaki cevap yeni giriş olmadan sunucuya geldi. Kopukken yazıldığı kullanıcı bildirimine dayanır, gelişi en az 1,5 dakika sürdü. Aynı gün sabah okul ağında cevap en az 7 dakika gelmedi, nedeni bilinmiyor.
 
 ### V7. Otomatik puanlama
 - **Durum:** Geliştirildi.
@@ -317,12 +318,14 @@ NORMALİZE(metin):
 
 **Görüntüleme:** `LogQueryService` + `LogsViewModel`: olay, öğrenci no, zaman filtresi; sayfa başına 100; en yeniden eskiye; "Ham dosyayı göster". Dosya yoksa tablodan üretilir ve kaydedilir (dokümandaki 404 yerine onaylı karar).
 
-**Bilinen eksikler:** Bağlantı olayları tabloya yazılmıyor. `SCORE_OVERRIDDEN` 16 karakter olduğundan ham dosyada o satır bir karakter kayıyor.
+**Uygulama logu:** İstek logu `ApiExceptionMiddleware`'in dışında çalışır, gerçek durum kodunu yazar. 06.11'e kadar içinde olduğu için 401 gibi cevaplar logda 500 ve `[ERR]` görünüyordu (kullanıcıya doğru kod gidiyordu).
+
+**Bilinen eksikler:** Bağlantı olayları tabloya yazılmıyor. `SECOND_DEVICE` IP'ye bakar: aynı bilgisayarın ağı değişirse de yazılır (06.11 12:36 gözlendi). `SCORE_OVERRIDDEN` 16 karakter olduğundan ham dosyada o satır bir karakter kayıyor.
 
 ## 12. Gerçek test sonuçları
 
 ### Otomatik testler (06.11.2026, düzeltme sonrası)
-**Toplam 473: 473 geçti.** `dotnet test -c Release` 4 kez, `-c Debug` 1 kez. Düzeltmeden önceki çalıştırmada 472/473 alınmıştı (bkz. Bölüm 13).
+**Toplam 474: 474 geçti.** `dotnet test -c Release` 2 kez, `-c Debug` 1 kez (log düzeltmesi sonrası). Tablo 473 testlik çalıştırmadan; sonradan `RequestPipelineOrderTests` 1 eklendi. Düzeltmeden önceki çalıştırmada 472/473 alınmıştı (bkz. Bölüm 13).
 
 | Sınıf | Adet | Sınıf | Adet |
 |---|---|---|---|
@@ -372,11 +375,11 @@ Gerçek sunucu ve uygulamalar, geçici şema. Aşama 8–9: 38/38, sunucu kapat�
 | VT-17 yayın | Bildirildi | Bildirildi, 2 lobi, süre ölçülmedi |
 | Otomatik kayıt | — | **Kayıtta var** |
 | VT-27 saat değişimi | Bildirildi | Bildirildi |
-| VT-24 ağ kopması | Bildirildi | **Tamamlanmadı**, A dönmedi |
+| VT-24 ağ kopması | Bildirildi | Sabah okul ağında gelmedi. **12:45 telefon ağında kayıtta var** |
 | VT-19 geri dönüş | Yapılmadı | **Kayıtta var** |
 | VT-21 ikinci cihaz | Yapılmadı | **Kayıtta var** |
 | VT-30 sunucu yeniden başlatma | Yapılmadı | **Yapılmadı** |
-| Teslim | Kayıtta var | Yapılmadı |
+| Teslim | Kayıtta var | Kayıtta var (12:37, A, telefon ağı) |
 | Otomatik teslim ve puan | Kayıtta var | Kayıtta var (A 20.00, B 10.00) |
 | VT-34 elle düzeltme | Kayıtta var | Yapılmadı |
 | VT-35 sonuç listesi | Bildirildi | Yapılmadı |
